@@ -5,7 +5,7 @@ Skill・Markdown・テンプレートだけで動き、外部のAI APIには依�
 
 この仕組みが担当するのは、**本実装の前に画面を決める段階**。単体のHTML/CSS/JSで画面案を3案作って比べ、採用案を修正し、デザイン仕様にまとめる。本実装は仕様が決まってから、別の作業として行う。
 
-現在は Phase 2(ルールの改善)。ルールは v2。改訂の内容と根拠は [rules/06-roadmap.md](.claude/skills/ui-design-rules/rules/06-roadmap.md) の改訂履歴にある。
+現在は Phase 2(ルールの改善)。ルールは v3。改訂の内容と根拠は [rules/06-roadmap.md](.claude/skills/ui-design-rules/rules/06-roadmap.md) の改訂履歴にある。
 
 ## 構成
 
