@@ -8,7 +8,8 @@
 /* 案C Operational Density
    方針: 1440×900 で全体が見渡せる。タスクは1表にまとめ、行は1行。
    見る順番は ①要約バー(件数と最優先) → ②今日対応の行 → ③それ以外(控えめ)。
-   左端の線は使わない。状態は文字・形・色で示す。 */
+   管理画面の構造(ナビのアイコン・ページ見出し・ヘッダーのツール・囲まれた領域・表)は崩さない。
+   強い色は「今日対応の件数」の1か所だけ。左端の線は使わない。状態は文字・形・色で示す。 */
 :root {
   --bg: #eff1f3;
   --surface: #ffffff;
@@ -46,33 +47,43 @@ button { font: inherit; color: inherit; }
 .mono { font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; }
 
 /* ---- 枠組み ---- */
-.app { display: grid; grid-template-columns: 148px minmax(0, 1fr); min-height: 100vh; position: relative; }
+.app { display: grid; grid-template-columns: 176px minmax(0, 1fr); min-height: 100vh; position: relative; }
 .sidebar { background: var(--side); color: var(--side-ink); padding: 12px 8px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; }
 .brand { display: flex; align-items: center; gap: 7px; padding: 4px 8px 14px; color: #fff; font-weight: 700; font-size: 14px; }
 .brand .ic { color: #6fd3c8; width: 16px; height: 16px; }
 .nav { display: grid; gap: 1px; }
-.nav a { display: block; padding: 6px 8px; border-radius: 3px; color: var(--side-ink); text-decoration: none; }
+.nav a { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 4px; color: var(--side-ink); text-decoration: none; }
+.nav a .ic { width: 16px; height: 16px; opacity: .85; }
 .nav a:hover { background: #2a3944; color: #fff; }
 .nav a[aria-current="page"] { background: #30424f; color: #fff; font-weight: 700; }
 .side-user { margin-top: auto; padding: 10px 8px 0; border-top: 1px solid #34444f; font-size: 12px; color: #aebbc5; }
 .side-user strong { display: block; color: #fff; font-size: 13px; }
 
-.topbar { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--line2); }
-.topbar .ws { font-weight: 700; }
+.topbar { display: flex; align-items: center; gap: 12px; height: 48px; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--line2); }
+.topbar .ws { font-weight: 700; white-space: nowrap; }
 .topbar .sp { flex: 1; }
-.topbar .date { color: var(--ink2); font-variant-numeric: tabular-nums; }
-.topbar .me { padding-left: 4px; }
+.search { display: flex; align-items: center; gap: 7px; width: 280px; height: 30px; padding: 0 10px; background: var(--bg); border: 1px solid var(--line2); border-radius: 4px; color: var(--ink3); }
+.search:focus-within { outline: 3px solid var(--focus); outline-offset: 1px; }
+.search input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; color: var(--ink); outline: none; }
+.search input::placeholder { color: var(--ink3); opacity: 1; }
+.icon-btn { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 4px; background: transparent; color: var(--ink2); cursor: pointer; }
+.icon-btn:hover { background: var(--bg); }
+.icon-btn .ic { width: 17px; height: 17px; }
+.me { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.avatar { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--teal); color: #fff; font-size: 12px; font-weight: 700; }
 .menu-btn { display: none; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: -12px; border: 0; background: transparent; cursor: pointer; }
 .menu-btn .ic { width: 20px; height: 20px; }
-.topbar .date-short { display: none; }
 
-.main { padding: 12px 16px 12px; min-width: 0; display: grid; gap: 12px; }
+.main { padding: 10px 16px 10px; min-width: 0; display: grid; gap: 10px; }
+.page-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 14px; }
+.page-head h1 { font-size: 18px; font-weight: 800; }
+.page-head .date { color: var(--ink2); font-variant-numeric: tabular-nums; }
 
 /* ---- 要約バー ---- */
-.strip { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 28px; padding: 12px 18px; background: var(--surface); border: 1px solid var(--line2); border-radius: 3px; }
+.strip { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 28px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--line2); border-radius: 3px; }
 .strip .lead { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 22px; min-width: 0; }
 .strip .big { display: flex; align-items: baseline; gap: 6px; }
-.strip .big strong { font-size: 36px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; }
+.strip .big strong { font-size: 36px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--teal); }
 .strip .big span { font-size: 14px; font-weight: 700; }
 .strip .top { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; min-width: 0; }
 .strip .top .lbl { color: var(--ink3); font-size: 12px; }
@@ -83,9 +94,9 @@ button { font: inherit; color: inherit; }
 .stats b { font-size: 15px; color: var(--ink); font-variant-numeric: tabular-nums; margin-left: 4px; }
 .stats .zero b { color: var(--ink3); font-weight: 500; }
 
-.cols { display: grid; grid-template-columns: minmax(0, 1fr) 332px; gap: 12px; align-items: start; }
-.left { display: grid; gap: 12px; min-width: 0; }
-.panel { background: var(--surface); border: 1px solid var(--line2); border-radius: 3px; min-width: 0; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) 332px; gap: 10px; align-items: start; }
+.left { display: grid; gap: 10px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line2); border-radius: 4px; min-width: 0; overflow: hidden; }
 .p-head { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-bottom: 1px solid var(--line2); }
 .p-head h2 { font-size: 13px; font-weight: 800; }
 .p-head .cnt { color: var(--ink3); }
@@ -94,7 +105,7 @@ button { font: inherit; color: inherit; }
 /* ---- 表 ---- */
 table.t { width: 100%; border-collapse: collapse; }
 .t th { text-align: left; font-size: 11.5px; font-weight: 600; color: var(--ink3); padding: 5px 8px; background: var(--head); border-bottom: 1px solid var(--line2); white-space: nowrap; }
-.t td { padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.t td { padding: 4px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .t tbody tr:last-child td { border-bottom: 0; }
 .t tbody tr:hover td { background: #f6f9fa; }
 .t tr.grp th { background: var(--head); color: var(--ink); font-size: 12px; font-weight: 800; padding: 5px 10px; border-top: 1px solid var(--line2); border-bottom: 1px solid var(--line2); }
@@ -132,9 +143,9 @@ tr.empty-row .ic { width: 16px; height: 16px; margin-right: 6px; }
 .seg button { padding: 2px 9px; min-height: 24px; border: 1px solid var(--line2); background: var(--surface); border-radius: 3px; cursor: pointer; font-size: 12px; }
 .seg button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 700; }
 .p-state { width: 76px; white-space: nowrap; }
-.p-name { width: 214px; font-weight: 700; overflow-wrap: anywhere; }
-.p-prog { width: 178px; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.p-due { width: 138px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.p-name { width: 190px; font-weight: 700; overflow-wrap: anywhere; }
+.p-prog { width: 160px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.p-due { width: 134px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .p-due small { color: var(--ink2); margin-left: 6px; }
 .p-own { width: 84px; white-space: nowrap; }
 .p-memo { color: var(--ink2); font-size: 12.5px; }
@@ -143,6 +154,14 @@ tr.empty-row .ic { width: 16px; height: 16px; margin-right: 6px; }
 .p-prog .f { color: var(--ink3); margin-left: 6px; font-size: 12px; }
 tr.calm td { color: var(--ink2); }
 tr.calm .p-name { font-weight: 600; }
+
+@media (min-width: 900px) {
+  .seg { flex-wrap: nowrap; gap: 0; }
+  .seg button { border-radius: 0; margin-left: -1px; }
+  .seg button:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+  .seg button:last-child { border-radius: 0 4px 4px 0; }
+  .seg button[aria-pressed="true"] { position: relative; z-index: 1; }
+}
 
 /* ---- アクティビティ ---- */
 .feed { padding: 0 12px 6px; }
@@ -165,13 +184,9 @@ tr.calm .p-name { font-weight: 600; }
   .sidebar.is-open { display: flex; }
   .sidebar .brand { display: none; }
   .nav a { padding: 11px 8px; }
-  .topbar { height: 48px; padding: 0 12px; gap: 6px; }
+  .topbar { padding: 0 12px; gap: 6px; }
   .menu-btn { display: inline-flex; }
-  .topbar .ws { white-space: nowrap; }
-  .ws-brand { display: none; }
-  .topbar .date { display: none; }
-  .topbar .date-short { display: inline; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink2); }
-  .topbar .me { padding-left: 8px; white-space: nowrap; }
+  .ws-brand, .search, .icon-btn, .me .name { display: none; }
   .main { padding: 10px 10px 32px; }
   .strip { padding: 10px 12px; gap: 6px 16px; }
   .strip .top { flex-basis: 100%; }
@@ -229,6 +244,15 @@ tr.calm .p-name { font-weight: 600; }
     <symbol id="p-late" viewBox="0 0 16 16"><path d="M8 1L15 8L8 15L1 8Z" fill="currentColor"/><path d="M8 4.6v4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11" r="1" fill="#fff"/></symbol>
     <symbol id="p-hold" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.3 5.5v5M9.7 5.5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
     <symbol id="star" viewBox="0 0 24 24"><path d="M12 1.5l2.2 8.3 8.3 2.2-8.3 2.2L12 22.5l-2.2-8.3L1.5 12l8.3-2.2z" fill="currentColor"/></symbol>
+    <symbol id="i-dash" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></g></symbol>
+    <symbol id="i-folder" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5a1 1 0 0 1 1-1h3l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></g></symbol>
+    <symbol id="i-task" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M5.5 8.2l1.8 1.8 3.2-3.6"/></g></symbol>
+    <symbol id="i-cal" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3.5" width="12" height="10.5" rx="1.5"/><path d="M2 6.7h12M5 2v3M11 2v3"/></g></symbol>
+    <symbol id="i-team" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.2"/><path d="M2 13c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5"/><circle cx="11.5" cy="6.5" r="1.7"/><path d="M11 9.6c1.9 0 3 1 3 2.9"/></g></symbol>
+    <symbol id="i-report" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13V8.5M8 13V3M12.5 13V6M2 14h12"/></g></symbol>
+    <symbol id="i-set" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h12M2 11h12"/><circle cx="6" cy="5" r="1.6" fill="#1d2830"/><circle cx="10.5" cy="11" r="1.6" fill="#1d2830"/></g></symbol>
+    <symbol id="i-search" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4"/><path d="M10 10l3.5 3.5"/></g></symbol>
+    <symbol id="i-bell" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3z"/><path d="M6.5 14a1.5 1.5 0 0 0 3 0"/></g></symbol>
     <symbol id="menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
   </defs>
 </svg>
@@ -237,13 +261,13 @@ tr.calm .p-name { font-weight: 600; }
   <nav class="sidebar" id="sidenav" aria-label="メインメニュー">
     <div class="brand"><svg class="ic" aria-hidden="true" focusable="false"><use href="#star"/></svg>Northstar</div>
     <div class="nav">
-      <a href="#" aria-current="page">ダッシュボード</a>
-      <a href="#">プロジェクト</a>
-      <a href="#">マイタスク</a>
-      <a href="#">カレンダー</a>
-      <a href="#">チーム</a>
-      <a href="#">レポート</a>
-      <a href="#">設定</a>
+      <a href="#" aria-current="page"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-dash"/></svg>ダッシュボード</a>
+      <a href="#"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-folder"/></svg>プロジェクト</a>
+      <a href="#"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-task"/></svg>マイタスク</a>
+      <a href="#"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-cal"/></svg>カレンダー</a>
+      <a href="#"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-team"/></svg>チーム</a>
+      <a href="#"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-report"/></svg>レポート</a>
+      <a href="#"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-set"/></svg>設定</a>
     </div>
     <div class="side-user"><strong>佐藤 遥</strong>チームリーダー</div>
   </nav>
@@ -252,14 +276,14 @@ tr.calm .p-name { font-weight: 600; }
     <header class="topbar">
       <button class="menu-btn" id="navToggle" type="button" aria-expanded="false" aria-controls="sidenav" aria-label="メニューを開く"><svg class="ic" aria-hidden="true" focusable="false"><use href="#menu"/></svg></button>
       <span class="ws"><span class="ws-brand">Northstar / </span>プロダクト開発チーム</span>
+      <label class="search"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-search"/></svg><input type="search" placeholder="検索" aria-label="検索"></label>
       <span class="sp"></span>
-      <span class="date" id="dateFull"></span>
-      <span class="date-short" id="dateShort"></span>
-      <span class="me">佐藤 遥</span>
+      <button class="icon-btn" type="button" aria-label="通知"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bell"/></svg></button>
+      <span class="me"><span class="avatar" aria-hidden="true">佐</span><span class="name">佐藤 遥</span><span class="sr">(ログイン中)</span></span>
     </header>
 
     <main class="main" id="main">
-      <h1 class="sr">ダッシュボード</h1>
+      <div class="page-head"><h1>ダッシュボード</h1><span class="date" id="dateFull"></span></div>
       <section class="strip" aria-label="今日の要約" id="strip"></section>
 
       <div class="cols">
@@ -567,7 +591,6 @@ document.addEventListener('click', e => {
 });
 
 $('dateFull').textContent = fullDate(TODAY);
-$('dateShort').textContent = mdw(TODAY);
 setupNav();
 render();
 </script>

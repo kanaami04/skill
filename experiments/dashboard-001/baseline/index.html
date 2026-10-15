@@ -6,7 +6,8 @@
 <title>ダッシュボード | Northstar</title>
 <style>
 :root {
-  --bg: #f6f5f2;
+  --bg: #e9ecf0;
+  --head-bg: #f3f4f6;
   --surface: #ffffff;
   --border: #d6d9de;
   --text: #16202e;
@@ -100,17 +101,19 @@ button { font: inherit; color: inherit; }
 .summary { margin-top: 4px; color: var(--text-sub); font-size: 14px; }
 .summary b { color: var(--text); font-size: 15px; }
 
-.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 40px; align-items: start; }
-.col { display: grid; gap: 36px; min-width: 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+.col { display: grid; gap: 20px; min-width: 0; }
 
-/* ---------- sections (枠なし。見出しと余白で区切る) ---------- */
-.panel-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 0 0 8px; border-bottom: 1px solid var(--border); }
-.panel-head h2 { font-size: 16px; line-height: 1.4; }
+/* ---------- panels (白地の枠。左線は使わない) ---------- */
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.panel-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.panel-head h2 { font-size: 15px; line-height: 1.4; }
 .panel-head .sub { color: var(--text-sub); font-size: 12px; }
 .count-pill { font-size: 14px; font-weight: 700; color: var(--text); }
 .count-pill.alert { color: var(--danger); }
-#h-today { font-size: 20px; }
-#today-count { font-size: 20px; color: var(--danger); }
+#h-today { font-size: 18px; }
+#today-count { font-size: 18px; color: var(--danger); }
+.panel-body.pad { padding: 0 18px 8px; }
 #today-count.zero { color: var(--ok); }
 
 /* ---------- badges / tags ---------- */
@@ -144,7 +147,7 @@ button { font: inherit; color: inherit; }
 .new-note { font-size: 12px; font-weight: 700; color: var(--accent); }
 
 /* ---------- tasks ---------- */
-.task-list { display: grid; }
+.task-list { display: grid; padding: 0 18px; }
 .task {
   display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 12px; align-items: start;
   padding: 12px 0; border-top: 1px solid var(--border);
@@ -159,21 +162,33 @@ button { font: inherit; color: inherit; }
 .task-due small { display: block; font-weight: 400; color: var(--text-sub); font-size: 12px; margin-top: 2px; }
 .task-note { color: var(--text-sub); }
 
+/* 今日対応するタスク(表) */
+.tasks-table td { vertical-align: middle; }
+.tasks-table .tc-check { width: 48px; padding-right: 0; }
+.tasks-table .task-check { margin: -10px 0 -10px -12px; }
+.tasks-table .tc-pri { width: 66px; }
+.tasks-table .tc-status { width: 112px; }
+.tasks-table .tc-due { width: 118px; }
+.tasks-table .tc-proj { width: 132px; color: var(--text-sub); font-size: 13px; }
+.tasks-table .tc-title { min-width: 220px; }
+.tasks-table .pri-label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+.tasks-table .task-due { text-align: left; }
+.tasks-table .task-sub { margin-top: 2px; font-size: 12px; color: var(--text-sub); }
+.tasks-table tr.is-done .task-title { text-decoration: line-through; color: var(--text-sub); font-weight: 400; }
 /* 最優先の1件だけ大きくする */
-.task.top { padding: 16px 0; }
-.task.top .task-title { font-size: 18px; font-weight: 700; line-height: 1.45; }
-.task.top .task-meta { margin-top: 6px; font-size: 13px; }
+.tasks-table tr.top td { padding-top: 18px; padding-bottom: 18px; }
+.tasks-table tr.top .task-title { font-size: 17px; font-weight: 700; line-height: 1.45; }
 .top-label { display: block; font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
 
-.empty { display: flex; gap: 14px; align-items: center; padding: 20px 0; }
+.empty { display: flex; gap: 14px; align-items: center; padding: 22px 18px; }
 .empty .tick { width: 36px; height: 36px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; font-size: 18px; flex: none; }
 .empty strong { display: block; font-size: 16px; color: var(--ok); }
 .empty span { font-size: 13px; color: var(--text-sub); }
-.none { padding: 12px 0; color: var(--text-sub); font-size: 13px; }
+.none { padding: 14px 18px; color: var(--text-sub); font-size: 13px; }
 
 /* ---------- attention projects ---------- */
 .attn-list { display: grid; }
-.attn { padding: 14px 0; border-top: 1px solid var(--border); }
+.attn { padding: 14px 18px; border-top: 1px solid var(--border); }
 .attn:first-child { border-top: 0; }
 .attn-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .attn-top h3 { font-size: 15px; }
@@ -182,7 +197,7 @@ button { font: inherit; color: inherit; }
 .attn-facts b { color: var(--text); font-weight: 600; }
 
 /* ---------- projects table ---------- */
-.filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 0; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 18px; border-bottom: 1px solid var(--border); }
 .filter-btn {
   min-height: 36px; padding: 4px 12px; border: 1px solid var(--border); border-radius: 4px;
   background: #fff; cursor: pointer; font-size: 13px;
@@ -194,10 +209,10 @@ button { font: inherit; color: inherit; }
 table.projects { width: 100%; border-collapse: collapse; }
 .projects th {
   text-align: left; font-size: 12px; font-weight: 600; color: var(--text-sub);
-  padding: 8px 12px; border-bottom: 1px solid var(--text-sub); white-space: nowrap;
+  padding: 9px 12px; background: var(--head-bg); border-bottom: 1px solid var(--border); white-space: nowrap;
 }
-.projects th:first-child, .projects td:first-child { padding-left: 0; }
-.projects th:last-child, .projects td:last-child { padding-right: 0; }
+.projects th:first-child, .projects td:first-child { padding-left: 18px; }
+.projects th:last-child, .projects td:last-child { padding-right: 18px; }
 .projects td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .projects tr:last-child td { border-bottom: 0; }
 .p-name { font-weight: 600; }
@@ -214,8 +229,9 @@ table.projects { width: 100%; border-collapse: collapse; }
 .nowrap { white-space: nowrap; }
 
 /* ---------- activity ---------- */
-.act-group h3 { font-size: 12px; font-weight: 700; color: var(--text-sub); padding: 12px 0 2px; display: flex; gap: 8px; align-items: baseline; }
-.act-item { padding: 8px 0; border-top: 1px solid var(--border); }
+.act-group h3 { font-size: 12px; font-weight: 700; color: var(--text-sub); padding: 9px 18px; background: var(--head-bg); display: flex; gap: 8px; align-items: baseline; }
+.act-item { padding-left: 18px !important; padding-right: 18px; }
+.act-item { padding-top: 9px; padding-bottom: 9px; border-top: 1px solid var(--border); }
 .act-item:first-of-type { border-top: 0; }
 .act-meta { font-size: 12px; color: var(--text-sub); display: flex; flex-wrap: wrap; gap: 0 8px; }
 .act-meta b { color: var(--text); font-weight: 600; }
@@ -223,7 +239,7 @@ table.projects { width: 100%; border-collapse: collapse; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 1180px) {
-  .layout { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
 }
 @media (max-width: 900px) {
   .shell { display: block; }
@@ -244,20 +260,35 @@ table.projects { width: 100%; border-collapse: collapse; }
   .content { padding: 16px 16px 40px; }
   .page-head { margin-bottom: 16px; }
   .page-head h1 { font-size: 19px; }
-  .col { gap: 28px; }
-  .layout { gap: 28px; }
-  #h-today, #today-count { font-size: 18px; }
-  .task.top .task-title { font-size: 16px; }
+  .col { gap: 16px; }
+  .layout { gap: 16px; }
+  .panel-head, .filters, .attn, .none { padding-left: 14px; padding-right: 14px; }
+  .task-list { padding: 0 14px; }
+  .act-group h3, .act-item { padding-left: 14px !important; padding-right: 14px; }
+  .empty { padding: 20px 14px; }
 
   .table-wrap { overflow: visible; }
   .projects thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
   .projects, .projects tbody { display: block; }
-  .projects tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; padding: 12px 0; border-top: 1px solid var(--border); }
+  .projects tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; padding: 12px 14px; border-top: 1px solid var(--border); }
   .projects tr:first-child { border-top: 0; }
   .projects td { display: block; padding: 0 !important; border: 0; }
   .projects td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; color: var(--text-sub); }
   .projects td.c-name { grid-column: 1 / -1; }
   .projects td.c-prog { grid-column: 1 / -1; }
+
+  .tasks-table tr { grid-template-columns: 44px 1fr 1fr; }
+  .tasks-table .tc-check, .tasks-table .tc-pri, .tasks-table .tc-status, .tasks-table .tc-due, .tasks-table .tc-proj { width: auto; }
+  .tasks-table .tc-title { min-width: 0; }
+  .tasks-table .pri-label { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; }
+  .tasks-table .tc-check { grid-column: 1; grid-row: 1; }
+  .tasks-table .tc-title { grid-column: 2 / -1; }
+  .tasks-table .tc-proj, .tasks-table .tc-due { grid-column: 2 / -1; }
+  .tasks-table .tc-pri { grid-column: 2; }
+  .tasks-table .tc-status { grid-column: 3; }
+  .tasks-table .task-due small { display: inline; margin-left: 8px; }
+  .tasks-table .task-check { margin: -10px 0 -10px -8px; }
+  .tasks-table tr.top .task-title { font-size: 16px; }
 }
 @media (max-width: 420px) {
   .task { grid-template-columns: auto minmax(0, 1fr); }
@@ -308,7 +339,7 @@ table.projects { width: 100%; border-collapse: collapse; }
 
       <div class="layout">
         <div class="col">
-          <section class="panel priority" aria-labelledby="h-today">
+          <section class="panel" aria-labelledby="h-today">
             <div class="panel-head">
               <h2 id="h-today">今日対応するタスク</h2>
               <span class="count-pill" id="today-count"></span>
@@ -463,7 +494,7 @@ table.projects { width: 100%; border-collapse: collapse; }
     return '<span class="badge st-' + s + '"><span class="g" aria-hidden="true">' + STATUS_GLYPH[s] + '</span>' + esc(s) + '</span>';
   }
   function priBadge(p) {
-    return '<span class="pri pri-' + p + '"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>優先度:' + p + '</span>';
+    return '<span class="pri pri-' + p + '"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span><span class="pri-label">優先度:</span>' + p + '</span>';
   }
 
   /* ---------- tasks ---------- */
@@ -496,6 +527,20 @@ table.projects { width: 100%; border-collapse: collapse; }
       dueHtml(t) + '</li>';
   }
 
+  function taskRowHtml(t, isTop) {
+    var pn = projectName(t.project);
+    return '<tr class="' + (isTop ? 'top' : '') + '" data-id="' + t.id + '">' +
+      '<td class="tc-check"><label class="task-check"><input type="checkbox" data-id="' + t.id + '"' +
+      ' aria-label="' + esc(t.title) + 'を完了にする"></label></td>' +
+      '<td class="tc-title">' + (isTop ? '<span class="top-label">最優先</span>' : '') +
+      '<div class="task-title">' + esc(t.title) + '</div>' +
+      (t.note ? '<div class="task-sub">' + esc(t.note) + '</div>' : '') + '</td>' +
+      '<td class="tc-proj">' + (pn ? esc(pn) : 'プロジェクトなし') + '</td>' +
+      '<td class="tc-pri">' + priBadge(t.priority) + '</td>' +
+      '<td class="tc-status">' + statusBadge(taskStatus(t)) + '</td>' +
+      '<td class="tc-due">' + dueHtml(t) + '</td></tr>';
+  }
+
   function renderTasks() {
     var today = TASKS.filter(isToday).sort(function (a, b) {
       return (toUTC(a.due) - toUTC(b.due)) || (PRI_RANK[a.priority] - PRI_RANK[b.priority]);
@@ -510,9 +555,10 @@ table.projects { width: 100%; border-collapse: collapse; }
     if (today.length === 0) {
       tb.innerHTML = '<div class="empty"><div class="tick" aria-hidden="true">✓</div><div><strong>今日の対応はすべて完了</strong><span>期限切れ・今日期限・ブロック中のタスクはありません。</span></div></div>';
     } else {
-      tb.innerHTML = '<ul class="task-list">' + today.map(function (t, i) {
-        return taskHtml(t, { urgent: true, top: i === 0 });
-      }).join('') + '</ul>';
+      tb.innerHTML = '<div class="table-wrap"><table class="projects tasks-table">' +
+        '<thead><tr><th scope="col"><span class="sr-only">完了</span></th><th scope="col">タスク</th><th scope="col">プロジェクト</th>' +
+        '<th scope="col">優先度</th><th scope="col">状態</th><th scope="col">期限</th></tr></thead><tbody>' +
+        today.map(function (t, i) { return taskRowHtml(t, i === 0); }).join('') + '</tbody></table></div>';
     }
     $('today-count').textContent = today.length + '件';
     $('today-count').classList.toggle('zero', today.length === 0);
