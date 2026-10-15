@@ -22,13 +22,13 @@ Claude Codeの標準機能とMarkdownだけで動く。外部のAI APIや追加�
 
 | 用途 | ファイル |
 |---|---|
-| 基本原則(Rule 01-05) | `rules/01-principles.md` |
-| アンチパターン | `rules/02-anti-patterns.md` |
-| 3案の生成プロトコル(Step 1-6) | `rules/03-design-protocol.md` |
-| 品質チェックリスト | `rules/04-quality-checklist.md` |
+| 基本原則(Rule 01-06) | `rules/01-principles.md` |
+| アンチパターンと AI典型(数える対象と上限) | `rules/02-anti-patterns.md` |
+| 3案の生成プロトコル(Step 1-8) | `rules/03-design-protocol.md` |
+| 品質チェックリスト(第一印象から) | `rules/04-quality-checklist.md` |
 | 実験方法(Baseline / Rules) | `rules/05-experiment.md` |
-| 開発方針(Phase 1-3) | `rules/06-roadmap.md` |
-| デザインブリーフ | `templates/design-brief.md` |
+| 開発方針と改訂履歴 | `rules/06-roadmap.md` |
+| 画面要件 | `templates/requirements.md` |
 | 3案の比較記録 | `templates/comparison.md` |
 | デザイン仕様 | `templates/design-spec.md` |
 | 実験ログ | `templates/experiment-log.md` |
@@ -39,18 +39,21 @@ Claude Codeの標準機能とMarkdownだけで動く。外部のAI APIや追加�
 
 - **画面を新しく作る / 作り直す** → 下の「基本フロー」。
 - **「ルールなしで作って」「Baselineで」と言われた** → このSkillのルールを使わず普段どおり作る。実験の記録だけ `rules/05-experiment.md` に従う。
-- **既存案の比較・採用理由の整理だけ** → `rules/03-design-protocol.md` の Step 5 と `templates/comparison.md`。
-- **採用案の仕様化だけ** → `rules/03-design-protocol.md` の Step 6 と `templates/design-spec.md`。
-- **ルール自体の改善** → `rules/` の該当ファイルを編集し、`rules/05-experiment.md` の記録を根拠にする。
+- **既存案の比較・採用理由の整理だけ** → `rules/03-design-protocol.md` の Step 6 と `templates/comparison.md`。
+- **採用案の修正** → `rules/03-design-protocol.md` の Step 7。原案の方向性より、指摘を優先する。
+- **採用案の仕様化だけ** → `rules/03-design-protocol.md` の Step 8 と `templates/design-spec.md`。
+- **ルール自体の改善** → `rules/` の該当ファイルを編集し、実験ログを根拠にする。`rules/06-roadmap.md` の改訂履歴に残す。
 
 ## 基本フロー
 
 1. `rules/01-principles.md` と `rules/02-anti-patterns.md` を読む。
-2. 要件を整理する。ブリーフ(`templates/design-brief.md`)が渡されていればそれを使う。なければ埋めてもらうか、仮定を明示して進める。重要な不明点を黙って確定しない。
-3. `rules/03-design-protocol.md` に従い、情報構造とレイアウトが異なる3案(A/B/C)を作る。
-4. 各案をブラウザで表示して検証する。表示できていないものを「確認済み」と報告しない。
-5. `templates/comparison.md` の形式で比較し、推奨案を示す。**最終決定はユーザーが行う。**
-6. ユーザーが採用案を決めたら、`templates/design-spec.md` の形式で仕様を出力する。ここでこのSkillの作業は終わり。
+2. 要件を整理する。画面要件(`templates/requirements.md` の形式)が渡されていればそれを使う。なければ埋めてもらうか、仮定を明示して進める。重要な不明点を黙って確定しない。
+3. **共通の土台を決める**(Step 2): 画面の種類と守る慣習、焦点、囲む単位、強調の段階。
+4. `rules/03-design-protocol.md` に従い、見せる UI と実務の UI の配分が異なる3案(A. Practical / B. Balanced / C. Presentable)を作る。
+5. 各案をブラウザで表示し、第一印象と AI典型の数を確認する。表示できていないものを「確認済み」と報告しない。
+6. `templates/comparison.md` の形式で比較し、推奨案を示す。**最終決定はユーザーが行う。**
+7. 採用案を、ユーザーの指摘に沿って修正する。
+8. ユーザーが採用を決めたら、`templates/design-spec.md` の形式で仕様を出力する。ここでこのSkillの作業は終わり。
 
 ## 守ること
 
@@ -59,6 +62,8 @@ Claude Codeの標準機能とMarkdownだけで動く。外部のAI APIや追加�
 - ビルドツール、フレームワーク、外部UIライブラリを使わない。外部フォントや外部画像などのネットワーク依存も原則避ける。
 - 本実装の技術スタックは、案の中身ではなく仕様(Step 6)の書き方に反映する(例: Tailwindのプロジェクトなら、仕様にTailwindでの対応を添える)。
 - 3案は同じ機能要件を満たす。色や角丸だけを変えた案は「3案」と見なさない。
+- 3案とも、画面の種類どおりに見えること(管理画面なら管理画面に)。個性のために別の種類の画面に見せない。
+- 自分の評価は人間より高く出やすい。点数で断定せず、第一印象と気になる点を具体的に書く。
 - アンチパターンは絶対禁止ではない。採用する場合は、目的と必要性を説明できること。
 - 要件が不明な場合は仮定を明示する。実データがないのにダミーの指標やグラフで見た目を埋めない。
 
