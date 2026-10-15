@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>注文 — Parcel(案A Practical)</title>
+<style>
+:root{
+  --bg:#F3F4F6; --panel:#fff; --ink:#18202B; --ink2:#46505E; --mute:#5E6977;
+  --line:#E2E6EB; --line2:#C9CFD7; --accent:#B93A0A; --hover:#F6F7F9; --sel:#EAF0F7;
+  --header-h:52px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Noto Sans JP",Meiryo,sans-serif;font-variant-numeric:tabular-nums}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:8px;top:-60px;background:var(--ink);color:#fff;padding:8px 12px;border-radius:6px;z-index:100}
+.skip:focus{top:8px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.muted{color:var(--mute)}
+
+/* ヘッダー */
+.top{height:var(--header-h);background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 20px}
+.brand{font-size:18px;font-weight:800;letter-spacing:.02em;color:var(--ink);text-decoration:none}
+.who{margin:0 0 0 auto;display:flex;gap:20px;color:var(--ink2);font-size:14px}
+.who span:last-child{color:var(--ink);font-weight:600}
+.menu-btn{display:none;height:36px;padding:0 12px;border:1px solid var(--line2);border-radius:6px;background:var(--panel);font-weight:600}
+
+/* 全体 */
+.shell{display:grid;grid-template-columns:208px minmax(0,1fr);min-height:calc(100vh - var(--header-h))}
+nav{background:var(--panel);border-right:1px solid var(--line);padding:12px}
+nav ul{list-style:none;margin:0;padding:0}
+nav a{display:block;padding:9px 12px;border-radius:6px;color:var(--ink2);text-decoration:none}
+nav a:hover{background:var(--hover);color:var(--ink)}
+nav a[aria-current="page"]{background:var(--sel);color:var(--ink);font-weight:700}
+main{padding:20px 24px 48px;min-width:0}
+.head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+h1{margin:0;font-size:22px;line-height:1.3;font-weight:700}
+.search input{width:340px;max-width:100%;height:38px;padding:0 12px;border:1px solid var(--line2);border-radius:6px;background:var(--panel)}
+.search input::placeholder{color:var(--mute)}
+
+/* 一覧の領域(囲むのはここだけ) */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.tabs{display:flex;padding:0 8px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:thin}
+.tab{flex:none;background:none;border:0;border-bottom:2px solid transparent;padding:12px 12px 10px;margin-bottom:-1px;color:var(--ink2);cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab .n{margin-left:5px;color:var(--mute)}
+.tab[aria-pressed="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--ink)}
+.tab[aria-pressed="true"] .n{color:var(--ink)}
+.tab.is-attn{font-weight:700}
+.tab.is-attn .n{color:var(--accent);font-weight:800;font-size:16px}
+
+.bar{position:sticky;top:0;z-index:5;background:var(--panel);display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.bar .status{margin:0;color:var(--ink2);flex:1 1 auto;min-width:0}
+.bar .status b{color:var(--ink)}
+.bar .why{flex:1 0 100%;margin:0;color:var(--ink);display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.bar .why[hidden]{display:none}
+.btn{height:36px;padding:0 14px;border:1px solid var(--line2);border-radius:6px;background:var(--panel);font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn-primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn-primary:hover{background:#0F151D}
+.btn:disabled{background:#EDEFF2;border-color:var(--line);color:#737D8A;cursor:not-allowed}
+.btn-sm{height:30px;padding:0 10px;font-size:13px}
+
+/* 表 */
+.tablewrap{overflow-x:auto;container-type:inline-size}
+table.list{width:100%;min-width:1040px;border-collapse:collapse}
+.list th{padding:8px 10px;text-align:left;font-size:13px;font-weight:600;color:var(--mute);border-bottom:1px solid var(--line2);white-space:nowrap}
+.list th.num{text-align:right}
+.list td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+.list tbody tr.row:hover{background:var(--hover)}
+.list tr.is-sel{background:var(--sel)}
+.list tr.is-sel:hover{background:var(--sel)}
+.list tr[aria-current="true"]{outline:2px solid var(--ink);outline-offset:-2px}
+.list .c-chk{width:44px;padding-left:16px;padding-right:0}
+.list input[type=checkbox]{width:18px;height:18px;margin:1px 0 0;accent-color:var(--ink)}
+.c-id{width:116px;white-space:nowrap}
+.c-id .sub{display:block;font-size:13px;color:var(--mute)}
+.link{background:none;border:0;padding:0;font-weight:700;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px}
+.link:hover{text-decoration-color:var(--ink)}
+.c-buyer{width:112px}
+.c-items{color:var(--ink2)}
+.c-amt{width:84px;white-space:nowrap}
+.c-pay{width:92px;white-space:nowrap}
+.c-state{width:116px;white-space:nowrap}
+.c-ship{width:72px;white-space:nowrap}
+.c-due{width:84px;white-space:nowrap}
+.c-due.hot{color:var(--accent);font-weight:700}
+.c-todo{width:236px}
+.c-todo .why-l{display:block;color:var(--accent);font-weight:700}
+.c-todo .act{display:block;color:var(--ink2)}
+.c-todo .act.ready{color:var(--ink);font-weight:700}
+.pay-err{color:var(--accent);font-weight:700}
+.pay-err b{font-weight:800}
+.pay-due{font-weight:700}
+.pay-muted{color:var(--mute)}
+.pie{display:inline-block;width:12px;height:12px;border:1.5px solid currentColor;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.pie.s1{background:conic-gradient(currentColor 0 25%,transparent 0)}
+.pie.s2{background:conic-gradient(currentColor 0 50%,transparent 0)}
+.pie.s3{background:conic-gradient(currentColor 0 75%,transparent 0)}
+.pie.s4{background:currentColor}
+.pie.sx{background:linear-gradient(135deg,transparent 42%,currentColor 42% 58%,transparent 58%)}
+.grp th{padding:14px 16px 8px;font-size:14px;font-weight:700;color:var(--ink2);border-bottom:1px solid var(--line2);white-space:normal}
+.grp.attn th{font-size:16px;font-weight:800;color:var(--accent)}
+.grp .cnt{margin-left:6px;font-weight:600;color:var(--ink2)}
+.empty{padding:48px 16px;text-align:center;color:var(--ink2)}
+.empty p{margin:0 0 4px}
+.empty .t{font-size:16px;font-weight:700;color:var(--ink)}
+.empty .btn{margin-top:14px}
+
+@container (max-width:880px){
+  table.list{min-width:740px}
+  .list .c-items,.list .c-ship,.list .c-pay{display:none}
+  .list .c-buyer{width:100px}.list .c-todo{width:200px}
+}
+/* 詳細(右側のドロワー)。開いている間は、一覧を左に寄せる */
+@media (min-width:900px){ body.lock main{margin-right:400px} }
+.detail{position:fixed;top:var(--header-h);right:0;bottom:0;width:400px;max-width:100%;background:var(--panel);border-left:1px solid var(--line2);overflow-y:auto;z-index:30}
+.detail[hidden]{display:none}
+.detail:focus{outline:none}
+.d-head{position:sticky;top:0;background:var(--panel);display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--line);z-index:2}
+.d-head h2{margin:0;font-size:18px;line-height:1.35;font-weight:700;flex:1;min-width:0}
+.d-head h2:focus{outline:none}
+.d-head .lbl-m{display:none}
+.d-body{padding:4px 20px 28px}
+.d-body section{padding:16px 0;border-bottom:1px solid var(--line)}
+.d-body section:last-of-type{border-bottom:0}
+.d-body h3{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--ink2)}
+.d-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 0 12px;border-bottom:1px solid var(--line)}
+.d-state{margin:0;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font-weight:600}
+.d-total{margin:0;font-size:22px;font-weight:700}
+.d-attn h3{color:var(--accent);font-size:14px}
+.d-attn ul{list-style:none;margin:0;padding:0}
+.d-attn li{margin:0 0 6px}
+.d-attn b{display:block;color:var(--accent)}
+.d-attn span{color:var(--ink2)}
+.d-lines{width:100%;border-collapse:collapse}
+.d-lines th,.d-lines td{padding:6px 0;text-align:left;font-weight:400;font-size:14px}
+.d-lines thead th{font-size:13px;color:var(--mute);border-bottom:1px solid var(--line)}
+.d-lines th.num,.d-lines td.num{text-align:right;padding-left:10px}
+.d-lines tfoot tr:first-child th,.d-lines tfoot tr:first-child td{padding-top:10px}
+.d-lines tfoot th{color:var(--ink2)}
+.d-lines tr.sum th,.d-lines tr.sum td{font-weight:700;color:var(--ink);border-top:1px solid var(--line)}
+.d-info{margin:0;display:grid;gap:6px}
+.d-info div{display:grid;grid-template-columns:84px 1fr;gap:8px}
+.d-info dt{color:var(--mute)}
+.d-info dd{margin:0}
+.d-note{margin:0}
+.d-next{margin:12px 0 0}
+.d-body .btn{margin-top:12px;width:100%}
+
+/* 狭い画面 */
+@media (max-width:899px){
+  :root{--header-h:auto}
+  .top{flex-wrap:wrap;gap:2px 12px;padding:8px 16px 8px;height:auto;min-height:56px}
+  .menu-btn{display:block;order:2;margin-left:auto}
+  .who{order:3;flex:1 0 100%;margin:0;gap:6px 12px;flex-wrap:wrap;font-size:13px}
+  .shell{display:block}
+  nav{display:none;border-right:0;border-bottom:1px solid var(--line)}
+  nav.open{display:block}
+  main{padding:14px 16px 40px}
+  .head{flex-wrap:wrap;gap:10px;margin-bottom:12px}
+  .search{flex:1 0 100%}
+  .search input{width:100%}
+  .detail{inset:0;width:auto;border-left:0;z-index:50}
+  .d-head .lbl-m{display:inline}.d-head .lbl-d{display:none}
+  body.lock{overflow:hidden}
+  .bar{padding:10px 12px}
+  .bar .btn{flex:1 1 auto}
+  /* 表を、1件ずつのブロックに組み替える */
+  .tablewrap{overflow:visible}
+  table.list{min-width:0}
+  .list thead{display:none}
+  .list,.list tbody{display:block}
+  .list .c-items,.list .c-ship,.list .c-pay{display:block}
+  .list tr.row{display:grid;grid-template-columns:44px auto auto 1fr;grid-template-areas:"chk id id amt" "chk buyer buyer state" "chk items items items" "chk todo todo todo" "chk pay ship due";gap:2px 8px;padding:12px 12px 12px 0;border-bottom:1px solid var(--line)}
+  .list tr.row td{display:block;border:0;padding:0;width:auto}
+  .list td.c-chk{grid-area:chk;padding:2px 0 0 14px}
+  .list td.c-id{grid-area:id;display:flex;gap:10px;align-items:baseline}
+  .list td.c-amt{grid-area:amt;text-align:right}
+  .list td.c-buyer{grid-area:buyer;font-weight:600}
+  .list td.c-state{grid-area:state;text-align:right}
+  .list td.c-items{grid-area:items}
+  .list td.c-todo{grid-area:todo;margin-top:2px}
+  .list td.c-todo:empty{display:none}
+  .list td.c-pay{grid-area:pay}
+  .list td.c-ship{grid-area:ship}
+  .list td.c-due{grid-area:due;text-align:right}
+  .list td.c-due::before{content:"発送期限 ";color:var(--mute);font-weight:400}
+  .list td.c-due.hot::before{color:var(--accent)}
+  .list tr.is-sel{background:var(--sel)}
+  .list tr.grp{display:block}
+  .list tr.grp th{display:block;padding:14px 12px 8px}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">本文へ移動</a>
+<header class="top">
+  <a class="brand" href="#">Parcel</a>
+  <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="nav">メニュー</button>
+  <p class="who"><span>灯台珈琲</span><span id="today"></span><span>森田 恵</span></p>
+</header>
+
+<div class="shell">
+  <nav id="nav" aria-label="メインメニュー">
+    <ul>
+      <li><a href="#">ホーム</a></li>
+      <li><a href="#" aria-current="page">注文</a></li>
+      <li><a href="#">商品</a></li>
+      <li><a href="#">在庫</a></li>
+      <li><a href="#">顧客</a></li>
+      <li><a href="#">設定</a></li>
+    </ul>
+  </nav>
+
+  <main id="main">
+    <div class="head">
+      <h1>注文</h1>
+      <form class="search" role="search" onsubmit="return false">
+        <label class="sr" for="q">注文番号・購入者名・商品名で検索</label>
+        <input id="q" type="search" placeholder="注文番号・購入者名・商品名" autocomplete="off">
+      </form>
+    </div>
+
+    <section class="panel" aria-label="注文一覧">
+      <div class="tabs" id="tabs" role="group" aria-label="注文状態で絞り込み"></div>
+      <div class="bar" id="bar">
+        <button type="button" class="btn" id="pickReady"></button>
+        <p class="status" id="selText" role="status"></p>
+        <button type="button" class="btn btn-primary" id="advance" aria-describedby="selText">発送準備中にする</button>
+        <p class="why" id="why" hidden></p>
+      </div>
+      <div class="tablewrap" id="tablewrap">
+        <table class="list">
+          <thead>
+            <tr>
+              <th scope="col" class="c-chk"><input type="checkbox" id="pickAll" aria-label="表示中の注文をすべて選択"></th>
+              <th scope="col" class="c-id">注文番号</th><th scope="col" class="c-buyer">購入者</th><th scope="col" class="c-items">商品</th>
+              <th scope="col" class="num c-amt">金額</th><th scope="col" class="c-pay">支払い</th><th scope="col" class="c-state">注文状態</th>
+              <th scope="col" class="c-ship">配送</th><th scope="col" class="c-due">発送期限</th><th scope="col" class="c-todo">対応</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="empty" hidden>
+        <p class="t">条件に合う注文はありません</p>
+        <p id="emptyCond"></p>
+        <button type="button" class="btn" id="clear">検索と絞り込みを解除</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<aside class="detail" id="detail" aria-label="注文の詳細" hidden>
+  <div class="d-head">
+    <h2 id="dTitle" tabindex="-1"></h2>
+    <button type="button" class="btn btn-sm" id="dClose"><span class="lbl-d">閉じる</span><span class="lbl-m">← 一覧に戻る</span></button>
+  </div>
+  <div class="d-body" id="dBody"></div>
+</aside>
+<div class="sr" id="live" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== 共通データと業務ロジック(全案で同一) ===== */
+const Core = (() => {
+  const TODAY = { y: 2026, m: 10, d: 16, num: 1016, label: '2026年10月16日(金)', time: '10:30' };
+  const PRICE = {
+    '深煎りブレンド 200g': 1480, '浅煎りブレンド 200g': 1480, 'エチオピア 200g': 1780,
+    'カフェインレス 200g': 1600, 'ドリップバッグ 10個入': 1620, 'ギフトセット(豆2種)': 4800,
+  };
+  const STATES = ['新規', '確認済み', '発送準備中', '発送済み', '配達完了', 'キャンセル'];
+  // 並び: 新しい順
+  const RAW = [
+    ['10248', '10/16 09:52', '山本 葵', '東京都 世田谷区', [['深煎りブレンド 200g', 2]], 3560, 'クレジットカード', '入金済み', '新規', '宅配便', null, '10/18', ''],
+    ['10247', '10/16 08:15', '佐々木 大輔', '神奈川県 横浜市', [['ドリップバッグ 10個入', 1]], 1820, 'コンビニ払い', '未入金', '新規', 'メール便', '10/19', '入金後', ''],
+    ['10246', '10/16 01:40', '中村 由衣', '大阪府 大阪市', [['ギフトセット(豆2種)', 1]], 5400, 'クレジットカード', '決済エラー', '新規', '宅配便', null, null, 'カードの承認エラー。購入者への連絡が必要'],
+    ['10245', '10/15 21:03', '小林 誠', '埼玉県 さいたま市', [['エチオピア 200g', 1], ['浅煎りブレンド 200g', 1]], 3860, 'クレジットカード', '入金済み', '確認済み', '宅配便', null, '10/17', '配達日時指定: 10/18 午前'],
+    ['10244', '10/15 18:47', '加藤 美咲', '愛知県 名古屋市', [['ドリップバッグ 10個入', 3]], 5460, 'クレジットカード', '入金済み', '確認済み', '宅配便', null, '10/17', 'ギフト包装'],
+    ['10243', '10/15 12:30', '吉田 健太', '福岡県 福岡市', [['深煎りブレンド 200g', 1]], 1680, '銀行振込', '未入金', '確認済み', 'メール便', '10/18', '入金後', ''],
+    ['10242', '10/15 10:05', '山田 花子', '北海道 札幌市', [['カフェインレス 200g', 2]], 4130, '代金引換', '代引き', '発送準備中', '宅配便', null, '10/16', ''],
+    ['10241', '10/14 22:18', '松本 拓也', '千葉県 船橋市', [['浅煎りブレンド 200g', 1]], 1680, 'クレジットカード', '入金済み', '発送準備中', 'メール便', null, '10/16', ''],
+    ['10240', '10/14 15:40', '井上 さやか', '京都府 京都市', [['ギフトセット(豆2種)', 2]], 9600, 'クレジットカード', '入金済み', '発送準備中', '宅配便', null, '10/15', 'のし「御礼」。発送期限を1日超過'],
+    ['10239', '10/14 09:12', '木村 涼', '宮城県 仙台市', [['エチオピア 200g', 2]], 4160, '銀行振込', '未入金', '確認済み', '宅配便', '10/17', '入金後', ''],
+    ['10238', '10/13 20:55', '林 直樹', '広島県 広島市', [['ドリップバッグ 10個入', 1]], 1820, 'コンビニ払い', '未入金', '確認済み', 'メール便', '10/16', '入金後', '支払期限が今日'],
+    ['10237', '10/13 14:22', '清水 愛', '東京都 杉並区', [['深煎りブレンド 200g', 2], ['ドリップバッグ 10個入', 1]], 5180, 'クレジットカード', '入金済み', '発送済み', '宅配便', null, '10/15', '10/15 発送'],
+    ['10236', '10/13 11:08', '山口 翔', '兵庫県 神戸市', [['浅煎りブレンド 200g', 1]], 1680, 'クレジットカード', '入金済み', '発送済み', 'メール便', null, '10/15', '10/14 発送'],
+    ['10235', '10/12 19:30', '森 千尋', '静岡県 静岡市', [['カフェインレス 200g', 1]], 2530, '代金引換', '代引き', '発送済み', '宅配便', null, '10/14', '10/14 発送'],
+    ['10234', '10/12 16:44', '池田 悠', '東京都 渋谷区', [['ギフトセット(豆2種)', 1]], 5400, 'クレジットカード', '返金済み', 'キャンセル', '宅配便', null, null, '購入者都合のキャンセル(10/13)'],
+    ['10233', '10/12 10:02', '橋本 結衣', '長野県 松本市', [['エチオピア 200g', 1]], 2380, '銀行振込', '入金済み', '発送済み', '宅配便', null, '10/15', '10/13 入金、10/14 発送'],
+    ['10232', '10/11 22:40', '阿部 健', '新潟県 新潟市', [['深煎りブレンド 200g', 3]], 5040, 'クレジットカード', '入金済み', '配達完了', '宅配便', null, '10/13', '10/14 配達完了'],
+    ['10231', '10/11 13:15', '石川 遥', '東京都 練馬区', [['ドリップバッグ 10個入', 2]], 3440, 'コンビニ払い', '入金済み', '配達完了', 'メール便', null, '10/14', '10/13 配達完了'],
+  ];
+  const orders = RAW.map(([id, at, buyer, dest, items, total, payMethod, payState, state, ship, payDue, shipDue, note]) =>
+    ({ id, at, buyer, dest, items, total, payMethod, payState, state, ship, payDue, shipDue, note }));
+  const byId = (id) => orders.find((o) => o.id === id);
+
+  const FILTERS = [
+    { key: 'all', label: 'すべて' },
+    { key: 'attention', label: '要対応' },
+    { key: 'new', label: '新規', state: '新規' },
+    { key: 'confirmed', label: '確認済み', state: '確認済み' },
+    { key: 'preparing', label: '発送準備中', state: '発送準備中' },
+    { key: 'shipped', label: '発送済み', state: '発送済み' },
+    { key: 'delivered', label: '配達完了', state: '配達完了' },
+    { key: 'canceled', label: 'キャンセル', state: 'キャンセル' },
+  ];
+  // 補助の絞り込み(必須の8つとは別)
+  const EXTRA_FILTERS = [{ key: 'ready', label: '発送準備に進める' }];
+  const filterLabel = (key) => [...FILTERS, ...EXTRA_FILTERS].find((f) => f.key === key).label;
+
+  /* ---- 日付 ---- */
+  const dayNum = (s) => { const m = /^(\d+)\/(\d+)$/.exec(s || ''); return m ? +m[1] * 100 + +m[2] : null; };
+  const daysBefore = (s) => { // s が今日の何日前か(今日=0)
+    const m = /^(\d+)\/(\d+)$/.exec(s); const t = Date.UTC(TODAY.y, TODAY.m - 1, TODAY.d);
+    return Math.round((t - Date.UTC(TODAY.y, +m[1] - 1, +m[2])) / 86400000);
+  };
+  const unshipped = (o) => o.state === '新規' || o.state === '確認済み' || o.state === '発送準備中';
+
+  /* ---- 要対応 ---- rank が小さいほど急ぐ */
+  function reasons(o) {
+    const r = [];
+    const sd = dayNum(o.shipDue);
+    if (sd && unshipped(o) && sd <= TODAY.num) {
+      const n = daysBefore(o.shipDue);
+      r.push(n > 0
+        ? { key: 'over', rank: 1, label: `発送期限 ${n}日超過`, short: `${n}日超過`, action: '今日中に発送する' }
+        : { key: 'today', rank: 3, label: '発送期限 今日', short: '期限 今日', action: '今日中に発送する' });
+    }
+    if (o.payState === '決済エラー') r.push({ key: 'payerr', rank: 2, label: '決済エラー', short: '決済エラー', action: '購入者に連絡する' });
+    const pd = dayNum(o.payDue);
+    if (o.payState === '未入金' && pd && pd <= TODAY.num) r.push({ key: 'unpaid', rank: 4, label: pd < TODAY.num ? '支払期限 超過' : '支払期限 今日', short: '支払期限 今日', action: '入金を確認する' });
+    if (o.state === '新規') r.push({ key: 'new', rank: 5, label: '新規(未確認)', short: '未確認', action: '内容を確認する' });
+    return r.sort((a, b) => a.rank - b.rank);
+  }
+  const isAttention = (o) => reasons(o).length > 0;
+  const topRank = (o) => Math.min(...reasons(o).map((r) => r.rank));
+  const byUrgency = (a, b) => topRank(a) - topRank(b) || (a.id < b.id ? 1 : -1);
+
+  /* ---- 発送準備 ---- */
+  const canAdvance = (o) => o.state === '確認済み' && (o.payState === '入金済み' || o.payState === '代引き');
+  function whyNot(o) {
+    if (canAdvance(o)) return '';
+    if (o.state === '新規') return '内容の確認が先です(新規)';
+    if (o.state === '確認済み') return o.payState === '未入金' ? '入金待ちです' : '支払い状態を確認してください';
+    if (o.state === 'キャンセル') return 'キャンセル済みです';
+    return `すでに${o.state}です`;
+  }
+
+  /* ---- 絞り込み・検索 ---- */
+  const norm = (s) => String(s).normalize('NFKC').toLowerCase().replace(/[\s#]+/g, '');
+  const hay = (o) => [o.id, o.buyer, ...o.items.map((i) => i[0])].map(norm);
+  function inFilter(o, key) {
+    if (key === 'all') return true;
+    if (key === 'attention') return isAttention(o);
+    if (key === 'ready') return canAdvance(o);
+    return o.state === FILTERS.find((f) => f.key === key).state;
+  }
+  function inSearch(o, q) {
+    const n = norm(q); if (!n) return true;
+    return hay(o).some((f) => f.includes(n)); // 注文番号・購入者名・商品名のどれかに部分一致
+  }
+  const countOf = (key) => orders.filter((o) => inFilter(o, key)).length;
+
+  /* ---- 金額の内訳(共通データのルールから計算) ---- */
+  function breakdown(o) {
+    const lines = o.items.map(([name, qty]) => ({ name, qty, unit: PRICE[name], sum: PRICE[name] * qty }));
+    const sub = lines.reduce((s, l) => s + l.sum, 0);
+    const shipFee = sub >= 5000 ? 0 : (o.ship === '宅配便' ? 600 : 200);
+    const cod = o.payMethod === '代金引換' ? 330 : 0;
+    return { lines, sub, shipFee, cod, total: sub + shipFee + cod };
+  }
+
+  /* ---- 表示用の小さな関数 ---- */
+  const yen = (n) => '¥' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const itemsText = (o) => o.items.map(([n, q]) => `${n} ×${q}`).join('、');
+  // 注文状態の進捗を形で表す(色に頼らない)。0=新規 … 4=配達完了、x=キャンセル
+  const STAGE = { '新規': 0, '確認済み': 1, '発送準備中': 2, '発送済み': 3, '配達完了': 4, 'キャンセル': 'x' };
+  const mark = (state) => `<i class="pie s${STAGE[state]}" aria-hidden="true"></i>`;
+  const payHTML = (o) => {
+    const cls = o.payState === '決済エラー' ? 'pay pay-err' : o.payState === '未入金' ? 'pay pay-due' : o.payState === '返金済み' ? 'pay pay-muted' : 'pay';
+    return `<span class="${cls}">${o.payState === '決済エラー' ? '<b aria-hidden="true">!</b> ' : ''}${o.payState}</span>`;
+  };
+  const dueText = (o) => (o.shipDue ? o.shipDue : '—');
+
+  /* ---- 共通の状態 ---- */
+  const store = { filter: 'all', q: '', sel: new Set(), detail: null };
+  const visible = () => orders.filter((o) => inFilter(o, store.filter) && inSearch(o, store.q));
+  const pruneSel = () => { const v = new Set(visible().map((o) => o.id)); [...store.sel].forEach((id) => { if (!v.has(id)) store.sel.delete(id); }); };
+  function selInfo() {
+    const picked = orders.filter((o) => store.sel.has(o.id));
+    return { n: picked.length, ok: picked.filter(canAdvance), ng: picked.filter((o) => !canAdvance(o)) };
+  }
+  function advance() {
+    const { ok, ng, n } = selInfo();
+    if (!n || ng.length) return 0;
+    ok.forEach((o) => { o.state = '発送準備中'; });
+    store.sel.clear();
+    return ok.length;
+  }
+  function advanceOne(id) { const o = byId(id); if (o && canAdvance(o)) { o.state = '発送準備中'; store.sel.delete(id); return true; } return false; }
+
+  /* ---- 詳細(全案共通の中身。見た目は各案のCSS) ---- */
+  function detailHTML(o) {
+    const b = breakdown(o); const rs = reasons(o); const ok = canAdvance(o);
+    const attention = rs.length ? `
+      <section class="d-attn" aria-label="対応が必要な理由">
+        <h3>要対応</h3>
+        <ul>${rs.map((r) => `<li><b>${esc(r.label)}</b><span>${esc(r.action)}</span></li>`).join('')}</ul>
+      </section>` : '';
+    const next = ok ? `<p class="d-next">発送準備に進められます。</p>`
+      : unshipped(o) || o.state === '新規' ? `<p class="d-next muted">発送準備に進めない理由: ${esc(whyNot(o))}</p>` : '';
+    const act = ok ? `<button type="button" class="btn btn-primary" data-advance-one="${o.id}">発送準備中にする</button>` : '';
+    return `
+      <div class="d-top">
+        <p class="d-state">${mark(o.state)}<span>${o.state}</span>${payHTML(o)}</p>
+        <p class="d-total">${yen(o.total)}</p>
+      </div>
+      ${attention}
+      <section aria-label="商品の明細">
+        <h3>商品の明細</h3>
+        <table class="d-lines">
+          <thead><tr><th scope="col">商品</th><th scope="col" class="num">単価</th><th scope="col" class="num">数量</th><th scope="col" class="num">小計</th></tr></thead>
+          <tbody>${b.lines.map((l) => `<tr><td>${esc(l.name)}</td><td class="num">${yen(l.unit)}</td><td class="num">${l.qty}</td><td class="num">${yen(l.sum)}</td></tr>`).join('')}</tbody>
+          <tfoot>
+            <tr><th scope="row" colspan="3">商品合計</th><td class="num">${yen(b.sub)}</td></tr>
+            <tr><th scope="row" colspan="3">送料(${o.ship})</th><td class="num">${b.shipFee ? yen(b.shipFee) : '無料'}</td></tr>
+            ${b.cod ? `<tr><th scope="row" colspan="3">代引き手数料</th><td class="num">${yen(b.cod)}</td></tr>` : ''}
+            <tr class="sum"><th scope="row" colspan="3">合計(税込)</th><td class="num">${yen(b.total)}</td></tr>
+          </tfoot>
+        </table>
+      </section>
+      <section aria-label="注文情報">
+        <h3>注文情報</h3>
+        <dl class="d-info">
+          <div><dt>購入者</dt><dd>${esc(o.buyer)}</dd></div>
+          <div><dt>注文日時</dt><dd>${o.at}</dd></div>
+          <div><dt>配送先</dt><dd>${esc(o.dest)}</dd></div>
+          <div><dt>配送方法</dt><dd>${o.ship}</dd></div>
+          <div><dt>支払方法</dt><dd>${o.payMethod}</dd></div>
+          <div><dt>支払期限</dt><dd>${o.payDue || '—'}</dd></div>
+          <div><dt>発送期限</dt><dd>${o.shipDue || '—'}</dd></div>
+        </dl>
+      </section>
+      <section aria-label="備考">
+        <h3>備考</h3>
+        <p class="d-note">${o.note ? esc(o.note) : '<span class="muted">なし</span>'}</p>
+      </section>
+      ${next}${act}`;
+  }
+
+  // 動作確認用(画面には出さない)
+  const selfTest = () => ({
+    attention: orders.filter(isAttention).map((o) => o.id).sort(),
+    ready: orders.filter(canAdvance).map((o) => o.id).sort(),
+    totalsOk: orders.every((o) => breakdown(o).total === o.total),
+    states: STATES.map((s) => [s, orders.filter((o) => o.state === s).length]),
+  });
+
+  return { TODAY, STATES, FILTERS, EXTRA_FILTERS, filterLabel, orders, byId, reasons, isAttention, byUrgency, canAdvance, whyNot, inFilter, inSearch, countOf, breakdown, yen, esc, itemsText, mark, payHTML, dueText, store, visible, pruneSel, selInfo, advance, advanceOne, detailHTML, unshipped, selfTest };
+})();
+
+
+(() => {
+  const S = Core.store, $ = (s) => document.querySelector(s);
+  const { esc, yen } = Core;
+  $('#today').textContent = `${Core.TODAY.label} ${Core.TODAY.time}`;
+
+  /* ナビの開閉(狭い画面) */
+  const nav = $('#nav'), menuBtn = $('#menuBtn');
+  menuBtn.addEventListener('click', () => {
+    const open = nav.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+  });
+
+  const announce = (msg) => { $('#live').textContent = ''; setTimeout(() => { $('#live').textContent = msg; }, 30); };
+
+  /* タブ(注文状態) */
+  const tabs = $('#tabs');
+  tabs.innerHTML = Core.FILTERS.map((f) => `<button type="button" class="tab${f.key === 'attention' ? ' is-attn' : ''}" data-f="${f.key}" aria-pressed="false">${f.label}<span class="n"></span></button>`).join('');
+  function renderTabs() {
+    tabs.querySelectorAll('.tab').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.f === S.filter));
+      b.querySelector('.n').textContent = Core.countOf(b.dataset.f);
+    });
+  }
+  tabs.addEventListener('click', (e) => {
+    const b = e.target.closest('.tab'); if (!b) return;
+    S.filter = b.dataset.f; Core.pruneSel(); renderAll();
+  });
+  $('#q').addEventListener('input', (e) => { S.q = e.target.value; Core.pruneSel(); renderRows(); });
+  $('#clear').addEventListener('click', () => { S.filter = 'all'; S.q = ''; $('#q').value = ''; renderAll(); $('#q').focus(); });
+
+  /* 表 */
+  function rowHTML(o) {
+    const rs = Core.reasons(o), ready = Core.canAdvance(o);
+    const hot = rs.some((r) => r.key === 'over' || r.key === 'today');
+    const acts = [...new Set(rs.map((r) => r.action))];
+    const todo = rs.length
+      ? `<span class="why-l">${esc(rs.map((r) => r.label).join(' / '))}</span><span class="act">${esc(acts.join('、'))}</span>`
+      : ready ? `<span class="act ready">発送準備に進める</span>` : '';
+    const picked = S.sel.has(o.id);
+    return `<tr class="row${picked ? ' is-sel' : ''}" data-id="${o.id}"${S.detail === o.id ? ' aria-current="true"' : ''}>
+      <td class="c-chk"><input type="checkbox" data-pick="${o.id}" aria-label="#${o.id} ${esc(o.buyer)} を選択"${picked ? ' checked' : ''}></td>
+      <td class="c-id"><button type="button" class="link" data-open="${o.id}">#${o.id}</button><span class="sub">${o.at}</span></td>
+      <td class="c-buyer">${esc(o.buyer)}</td>
+      <td class="c-items">${esc(Core.itemsText(o))}</td>
+      <td class="c-amt num">${yen(o.total)}</td>
+      <td class="c-pay">${Core.payHTML(o)}</td>
+      <td class="c-state">${Core.mark(o.state)}${o.state}</td>
+      <td class="c-ship">${o.ship}</td>
+      <td class="c-due${hot ? ' hot' : ''}">${Core.dueText(o)}</td>
+      <td class="c-todo">${todo}</td></tr>`;
+  }
+  function renderRows() {
+    const list = Core.visible();
+    let html = '';
+    if (S.filter === 'all') {
+      const a = list.filter(Core.isAttention).sort(Core.byUrgency), r = list.filter((o) => !Core.isAttention(o));
+      if (a.length) html += `<tr class="grp attn"><th scope="colgroup" colspan="10">要対応<span class="cnt">${a.length}件</span></th></tr>` + a.map(rowHTML).join('');
+      if (r.length) html += `<tr class="grp"><th scope="colgroup" colspan="10">その他の注文<span class="cnt">${r.length}件</span></th></tr>` + r.map(rowHTML).join('');
+    } else if (S.filter === 'attention') {
+      html = list.sort(Core.byUrgency).map(rowHTML).join('');
+    } else html = list.map(rowHTML).join('');
+    $('#rows').innerHTML = html;
+    const none = list.length === 0;
+    $('#tablewrap').hidden = none; $('#empty').hidden = !none;
+    if (none) {
+      const cond = [S.filter !== 'all' ? `絞り込み「${Core.filterLabel(S.filter)}」` : '', S.q ? `検索「${S.q}」` : ''].filter(Boolean).join(' と ');
+      $('#emptyCond').textContent = cond ? `${cond} に一致する注文がありません。` : '';
+    }
+    updatePickAll(list); updateBar();
+  }
+  function updatePickAll(list = Core.visible()) {
+    const all = $('#pickAll'), n = list.filter((o) => S.sel.has(o.id)).length;
+    all.checked = list.length > 0 && n === list.length; all.indeterminate = n > 0 && n < list.length; all.disabled = list.length === 0;
+  }
+  $('#pickAll').addEventListener('change', (e) => {
+    Core.visible().forEach((o) => (e.target.checked ? S.sel.add(o.id) : S.sel.delete(o.id)));
+    renderRows();
+  });
+  $('#rows').addEventListener('change', (e) => {
+    const c = e.target.closest('[data-pick]'); if (!c) return;
+    c.checked ? S.sel.add(c.dataset.pick) : S.sel.delete(c.dataset.pick);
+    c.closest('tr').classList.toggle('is-sel', c.checked);
+    updatePickAll(); updateBar();
+  });
+  $('#rows').addEventListener('click', (e) => {
+    if (e.target.closest('input,a')) return;
+    const open = e.target.closest('[data-open]'), row = e.target.closest('tr.row');
+    if (open) openDetail(open.dataset.open); else if (row) openDetail(row.dataset.id, true);
+  });
+
+  /* まとめて発送準備へ */
+  const ready = () => Core.orders.filter(Core.canAdvance);
+  function updateBar() {
+    const { n, ok, ng } = Core.selInfo();
+    $('#pickReady').textContent = `発送準備に進められる注文を選ぶ(${ready().length}件)`;
+    $('#pickReady').disabled = ready().length === 0;
+    const why = $('#why'), adv = $('#advance');
+    $('#selText').innerHTML = n ? `<b>${n}件</b>を選択中` : '注文が選ばれていません';
+    adv.disabled = n === 0 || ng.length > 0;
+    adv.textContent = ok.length && !ng.length ? `発送準備中にする(${ok.length}件)` : '発送準備中にする';
+    if (ng.length) {
+      why.hidden = false;
+      why.innerHTML = `<span>発送準備に進めない注文が含まれています: ${ng.map((o) => `<b>#${o.id}</b> ${esc(Core.whyNot(o))}`).join('、')}</span><button type="button" class="btn btn-sm" id="dropNg">進めない注文の選択を外す</button>`;
+    } else why.hidden = true;
+  }
+  $('#bar').addEventListener('click', (e) => {
+    if (e.target.id === 'dropNg') { Core.selInfo().ng.forEach((o) => S.sel.delete(o.id)); renderRows(); $('#advance').focus(); }
+  });
+  $('#pickReady').addEventListener('click', () => {
+    if (S.filter !== 'all' && S.filter !== 'confirmed') S.filter = 'all';
+    if (S.q) { S.q = ''; $('#q').value = ''; }
+    ready().forEach((o) => S.sel.add(o.id));
+    renderAll();
+    announce(`${ready().length}件を選択しました`);
+  });
+  $('#advance').addEventListener('click', () => {
+    const n = Core.advance(); if (!n) return;
+    renderAll(); if (S.detail) renderDetail();
+    announce(`${n}件を「発送準備中」にしました`);
+  });
+
+  /* 詳細 */
+  let lastTrigger = null;
+  function renderDetail() {
+    const o = Core.byId(S.detail); if (!o) return;
+    $('#dTitle').textContent = `#${o.id} ${o.buyer}`;
+    $('#dBody').innerHTML = Core.detailHTML(o);
+  }
+  function openDetail(id, fromRow) {
+    lastTrigger = document.querySelector(`[data-open="${id}"]`);
+    S.detail = id; renderDetail(); renderRows();
+    $('#detail').hidden = false; document.body.classList.add('lock');
+    $('#dTitle').focus();
+  }
+  function closeDetail() {
+    const id = S.detail; S.detail = null; $('#detail').hidden = true; document.body.classList.remove('lock');
+    renderRows();
+    (document.querySelector(`[data-open="${id}"]`) || $('#q')).focus();
+  }
+  $('#dClose').addEventListener('click', closeDetail);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.detail) closeDetail(); });
+  $('#dBody').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-advance-one]'); if (!b) return;
+    const id = b.dataset.advanceOne;
+    if (Core.advanceOne(id)) { renderAll(); renderDetail(); announce(`#${id} を「発送準備中」にしました`); $('#dTitle').focus(); }
+  });
+
+  function renderAll() { renderTabs(); renderRows(); }
+  renderAll();
+})();
+</script>
+</body>
+</html>

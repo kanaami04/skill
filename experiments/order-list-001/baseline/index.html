@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>注文管理 | Parcel</title>
+<style>
+  :root {
+    --bg: #f5f1ea;
+    --surface: #fffdf9;
+    --ink: #231b14;
+    --muted: #5e5348;
+    --line: #ddd3c4;
+    --line-strong: #b9ac98;
+    --accent: #1d5666;
+    --accent-ink: #ffffff;
+    --accent-soft: #e2edf0;
+    --danger: #a8321e;
+    --danger-soft: #fbe9e3;
+    --ok: #1f4a36;
+    --ok-soft: #e3ece8;
+    --warn: #7a4b00;
+    --warn-soft: #fff4de;
+    --side-w: 208px;
+    --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Noto Sans JP", Meiryo, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px/1.6 var(--font);
+    font-variant-numeric: tabular-nums;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .skip { position: absolute; left: 8px; top: -60px; background: var(--ink); color: #fff; padding: 8px 14px; z-index: 100; border-radius: 4px; }
+  .skip:focus { top: 8px; }
+
+  /* ---------- Layout ---------- */
+  .app { display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); min-height: 100vh; }
+
+  .side {
+    background: var(--ink);
+    color: #efe6d8;
+    position: sticky; top: 0; height: 100vh;
+    display: flex; flex-direction: column;
+    padding: 22px 14px;
+  }
+  .brand { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 22px; }
+  .brand-name { font-size: 22px; font-weight: 800; letter-spacing: .02em; display: flex; align-items: baseline; gap: 8px; }
+  .brand-name small { font-size: 11px; font-weight: 500; color: #b9ac98; letter-spacing: .08em; }
+  .menu-btn { display: none; }
+
+  .nav { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .nav a {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px; border-radius: 6px;
+    color: #efe6d8; text-decoration: none; font-weight: 500;
+  }
+  .nav a:hover { background: #3a2f25; }
+  .nav a[aria-current="page"] { background: var(--bg); color: var(--ink); font-weight: 700; }
+  .nav .badge { background: var(--danger); color: #fff; font-size: 12px; font-weight: 700; min-width: 22px; padding: 0 7px; border-radius: 11px; text-align: center; line-height: 20px; }
+  .side :focus-visible { outline-color: #f5c77e; }
+  .side-foot { margin-top: auto; padding: 0 8px; font-size: 12px; color: #b9ac98; }
+
+  .top {
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 12px 32px; border-bottom: 1px solid var(--line); background: var(--surface);
+  }
+  .shop { font-weight: 700; font-size: 15px; }
+  .shop span { font-weight: 500; color: var(--muted); font-size: 12px; margin-left: 8px; }
+  .today { color: var(--muted); }
+  .user { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+  .user small { display: block; color: var(--muted); font-size: 11px; line-height: 1.2; }
+
+  main { padding: 26px 32px 120px; max-width: 1400px; }
+  h1 { font-size: 22px; margin: 0 0 18px; letter-spacing: .01em; }
+  h2 { font-size: 16px; margin: 0; }
+
+  /* ---------- Today panel ---------- */
+  .today-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; margin-bottom: 30px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  .panel-head { display: flex; align-items: baseline; gap: 12px; padding: 14px 18px 12px; border-bottom: 1px solid var(--line); }
+  .big { font-size: 34px; font-weight: 800; line-height: 1; color: var(--danger); }
+  .big.zero { color: var(--ok); }
+  .panel-head .sub { color: var(--muted); font-size: 13px; }
+
+  .urgent { list-style: none; margin: 0; padding: 0; }
+  .urgent li {
+    display: grid; grid-template-columns: 6.5rem 6.2rem minmax(0, 1fr) auto; gap: 4px 14px; align-items: center;
+    padding: 9px 18px; border-bottom: 1px solid var(--line);
+  }
+  .urgent li:last-child { border-bottom: 0; }
+  .urgent .no { font-weight: 700; }
+  .urgent .who { color: var(--muted); }
+  .whys { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  .why { display: inline-flex; align-items: center; gap: 7px; }
+  .flag {
+    display: inline-block; padding: 0 8px; border: 1px solid var(--danger); color: var(--danger);
+    font-size: 12px; font-weight: 700; line-height: 20px; border-radius: 2px; white-space: nowrap; background: #fff;
+  }
+  .flag.hot { background: var(--danger); color: #fff; }
+  .link-btn {
+    background: none; border: 0; padding: 4px 2px; color: var(--accent); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
+  }
+  .empty-note { padding: 18px; color: var(--ok); font-weight: 700; margin: 0; }
+
+  .ready { padding: 0 0 4px; }
+  .ready ul { list-style: none; margin: 0; padding: 0 18px; }
+  .ready li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .ready li:last-child { border-bottom: 0; }
+  .ready .big { color: var(--accent); }
+  .ready p { margin: 0; padding: 10px 18px 0; color: var(--muted); font-size: 13px; }
+  .ready .actions { padding: 8px 18px 14px; }
+
+  .btn {
+    border: 1px solid var(--line-strong); background: var(--surface); border-radius: 6px; padding: 7px 14px; font-weight: 700; min-height: 36px;
+  }
+  .btn:hover { background: #f3ece0; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { background: #164552; }
+  .btn:disabled { background: #e8e1d5; border-color: #cfc5b4; color: #6f655a; cursor: not-allowed; }
+
+  /* ---------- List ---------- */
+  .list-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; gap: 12px; flex-wrap: wrap; }
+  .list-head .count { color: var(--muted); }
+  .toolbar { display: flex; gap: 14px 20px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tab {
+    border: 1px solid var(--line-strong); background: var(--surface); border-radius: 999px; padding: 4px 13px; min-height: 34px;
+    display: inline-flex; align-items: center; gap: 7px; font-weight: 500;
+  }
+  .tab .n { font-weight: 700; }
+  .tab:hover { background: #f3ece0; }
+  .tab[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; font-weight: 700; }
+  .tab.urgent-tab:not([aria-pressed="true"]) { border-color: var(--danger); color: var(--danger); font-weight: 700; }
+  .search { margin-left: auto; position: relative; }
+  .search input {
+    width: 300px; max-width: 100%; min-height: 38px; padding: 6px 12px 6px 34px;
+    border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface);
+  }
+  .search svg { position: absolute; left: 10px; top: 11px; width: 16px; height: 16px; color: var(--muted); pointer-events: none; }
+
+  .table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 980px; }
+  th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  thead th { font-size: 12px; font-weight: 700; color: var(--muted); background: #f1ebe0; white-space: nowrap; vertical-align: middle; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: #faf5ea; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr.sel { background: var(--accent-soft); }
+  tbody tr.done td:not(.c-chk) { color: var(--muted); }
+  th.num, td.num { text-align: right; }
+  .c-chk { width: 40px; padding-right: 0; }
+  input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); margin: 3px 0 0; cursor: pointer; }
+  .order-btn { background: none; border: 0; padding: 0; font-weight: 800; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+  .order-btn:hover { color: var(--accent); }
+  .tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+  .item { display: block; }
+  .amt { font-weight: 700; white-space: nowrap; }
+  .nowrap { white-space: nowrap; }
+  .due-hot { color: var(--danger); font-weight: 800; }
+  .due-hot::before { content: "▲ "; }
+  .muted { color: var(--muted); }
+  .go { display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .go::before { content: "→ "; }
+
+  /* chips: order state = filled pill, payment state = outlined box with a glyph */
+  .st {
+    display: inline-flex; align-items: center; gap: 5px; padding: 0 10px; line-height: 22px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; border: 1px solid transparent;
+  }
+  .st-新規 { background: var(--ink); color: #fff; }
+  .st-確認済み { background: #e7ddcc; color: var(--ink); border-color: #cdbfa8; }
+  .st-発送準備中 { background: var(--accent); color: #fff; }
+  .st-発送済み { background: #fff; color: var(--accent); border-color: var(--accent); }
+  .st-配達完了 { background: var(--ok-soft); color: var(--ok); border-color: #b5cdbf; }
+  .st-キャンセル { background: transparent; color: var(--muted); border: 1px dashed var(--line-strong); }
+  .pay {
+    display: inline-flex; align-items: center; gap: 5px; padding: 0 8px; line-height: 20px; border-radius: 3px; font-size: 12px; font-weight: 600; white-space: nowrap; border: 1px solid;
+  }
+  .pay i { font-style: normal; font-weight: 800; }
+  .pay-入金済み { color: var(--ok); border-color: #8fb3a0; background: #fff; }
+  .pay-未入金 { color: var(--warn); border-color: #c99a4e; background: var(--warn-soft); }
+  .pay-決済エラー { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); font-weight: 800; }
+  .pay-代引き { color: var(--ink); border-color: #8f8374; background: #fff; }
+  .pay-返金済み { color: var(--muted); border-color: var(--line-strong); border-style: dashed; background: transparent; }
+
+  .empty { padding: 44px 20px; text-align: center; }
+  .empty strong { display: block; font-size: 16px; margin-bottom: 4px; }
+  .empty p { margin: 0 0 14px; color: var(--muted); }
+
+  /* bulk bar */
+  .bulk {
+    position: sticky; bottom: 14px; margin-top: 14px; z-index: 5;
+    background: var(--ink); color: #fff; border-radius: 10px; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+    box-shadow: 0 6px 24px rgba(35, 27, 20, .28);
+  }
+  .bulk[hidden] { display: none; }
+  .bulk .cnt { font-weight: 800; }
+  .bulk .why-no { flex: 1 1 280px; color: #ffd9cf; font-size: 13px; margin: 0; }
+  .bulk .why-no.ok { color: #cfe8da; }
+  .bulk .btn { margin-left: auto; }
+  .bulk .btn.primary { background: #f5c77e; border-color: #f5c77e; color: var(--ink); }
+  .bulk .btn.primary:hover { background: #ffd790; }
+  .bulk .btn:disabled { background: #4a3f34; border-color: #4a3f34; color: #cfc5b4; }
+  .bulk .btn.ghost { margin-left: 0; background: transparent; border-color: #8f8374; color: #fff; }
+  .bulk :focus-visible { outline-color: #f5c77e; }
+
+  /* ---------- Detail drawer ---------- */
+  .scrim { position: fixed; inset: 0; background: rgba(35, 27, 20, .45); z-index: 40; }
+  .scrim[hidden], .drawer[hidden] { display: none; }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100vw); background: var(--surface); z-index: 50;
+    display: flex; flex-direction: column; box-shadow: -8px 0 30px rgba(35, 27, 20, .25);
+  }
+  .d-head { padding: 14px 20px; border-bottom: 1px solid var(--line); }
+  .back { background: none; border: 0; padding: 4px 0; color: var(--accent); font-weight: 700; margin-bottom: 6px; }
+  .d-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .d-title h2 { font-size: 22px; }
+  .d-body { overflow-y: auto; padding: 4px 20px 20px; flex: 1; }
+  .d-sec { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .d-sec:last-child { border-bottom: 0; }
+  .d-sec h3 { margin: 0 0 8px; font-size: 12px; color: var(--muted); letter-spacing: .06em; }
+  .d-sec p { margin: 0; }
+  dl.kv { display: grid; grid-template-columns: 7em 1fr; gap: 6px 10px; margin: 0; }
+  dl.kv dt { color: var(--muted); }
+  dl.kv dd { margin: 0; }
+  .d-todo { background: var(--danger-soft); border-radius: 8px; padding: 12px 14px; margin-top: 14px; }
+  .d-todo h3 { color: var(--danger); margin-bottom: 6px; }
+  .d-todo ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+  table.lines { min-width: 0; font-size: 13px; }
+  table.lines th, table.lines td { padding: 6px 0; border-bottom: 1px solid var(--line); background: none; font-size: 13px; color: var(--ink); font-weight: 400; }
+  table.lines th { color: var(--muted); font-size: 12px; font-weight: 700; }
+  table.lines tfoot td { border: 0; color: var(--muted); }
+  table.lines tfoot tr.sum td { color: var(--ink); font-weight: 800; border-top: 2px solid var(--ink); font-size: 15px; }
+  .d-foot { border-top: 1px solid var(--line); padding: 12px 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: var(--surface); }
+  .d-foot p { margin: 0; font-size: 13px; color: var(--muted); flex: 1 1 180px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ok); color: #fff; padding: 10px 18px; border-radius: 8px; font-weight: 700; z-index: 70; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    max-width: calc(100vw - 32px);
+  }
+  .toast:empty { display: none; }
+
+  /* ---------- Narrow screens ---------- */
+  @media (max-width: 1100px) {
+    .today-grid { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 900px) {
+    .app { grid-template-columns: minmax(0, 1fr); }
+    .side { position: sticky; top: 0; height: auto; z-index: 30; padding: 8px 14px; }
+    .brand { padding: 0; }
+    .side-foot { display: none; }
+    .menu-btn {
+      display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid #8f8374; color: #fff; border-radius: 6px; padding: 4px 12px; min-height: 40px; font-weight: 700;
+    }
+    .nav { display: none; padding: 8px 0 6px; }
+    .nav.open { display: grid; }
+    .top { padding: 8px 14px; gap: 2px 12px; }
+    .shop span { display: none; }
+    .user small { display: none; }
+    .avatar { display: none; }
+    main { padding: 14px 14px 110px; }
+    h1 { font-size: 16px; margin-bottom: 8px; }
+    .today-grid { margin-bottom: 24px; gap: 14px; }
+    .panel-head { padding: 10px 14px; }
+    .big { font-size: 28px; }
+    .urgent li { grid-template-columns: auto minmax(0, 1fr) auto; padding: 8px 14px; gap: 2px 10px; }
+    .urgent .whys { grid-column: 1 / -1; grid-row: 2; }
+    .urgent .link-btn { grid-column: 3; grid-row: 1; }
+    .search { margin-left: 0; width: 100%; }
+    .search input { width: 100%; }
+    .tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; margin: 0 -14px; padding: 0 14px 4px; width: calc(100% + 28px); }
+    .tab { flex: 0 0 auto; }
+
+    /* table -> cards */
+    .table-wrap { background: transparent; border: 0; overflow: visible; }
+    #tableWrap table, #tableWrap tbody { display: block; min-width: 0; }
+    #tableWrap thead tr { display: flex; align-items: center; gap: 10px; padding: 6px 4px; }
+    #tableWrap thead th { display: none; background: none; border: 0; padding: 0; }
+    #tableWrap thead th.c-chk { display: block; width: auto; }
+    #tableWrap thead th.c-chk::after { content: "表示中をすべて選択"; margin-left: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+    #tableWrap thead th.c-chk label { display: inline-flex; align-items: center; }
+    #tableWrap tbody tr {
+      display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; grid-template-areas:
+        "chk no st" "chk buyer amt" ". item item" ". pay due" ". at ship";
+      gap: 3px 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 10px 4px; margin-bottom: 10px;
+    }
+    #tableWrap tbody tr.sel { background: var(--accent-soft); border-color: var(--accent); }
+    #tableWrap tbody td { border: 0; padding: 0; text-align: left; }
+    #tableWrap td.num { text-align: right; }
+    .c-chk { grid-area: chk; width: auto; padding: 0 0 0 8px; }
+    .c-no { grid-area: no; }
+    .c-st { grid-area: st; justify-self: end; }
+    .c-buyer { grid-area: buyer; font-weight: 600; }
+    .c-amt { grid-area: amt; justify-self: end; }
+    .c-item { grid-area: item; color: var(--muted); font-size: 13px; }
+    .c-pay { grid-area: pay; align-self: center; }
+    .c-due { grid-area: due; justify-self: end; align-self: center; text-align: right; }
+    .c-at { grid-area: at; color: var(--muted); font-size: 12px; }
+    .c-ship { grid-area: ship; justify-self: end; color: var(--muted); font-size: 12px; }
+    .c-due::before { content: "発送期限 "; font-size: 12px; color: var(--muted); font-weight: 400; }
+    .c-due .due-hot { }
+    .c-ship::before { content: "配送 "; }
+    .bulk { bottom: 8px; }
+    .bulk .btn { margin-left: 0; width: 100%; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .tab, .btn, .nav a { transition: background-color .12s; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">本文へスキップ</a>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-name">Parcel <small>注文管理</small></div>
+      <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="nav">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        メニュー
+      </button>
+    </div>
+    <nav aria-label="メインメニュー">
+      <ul class="nav" id="nav">
+        <li><a href="#">ホーム</a></li>
+        <li><a href="#" aria-current="page">注文 <span class="badge" id="navBadge" aria-label="要対応">7</span></a></li>
+        <li><a href="#">商品</a></li>
+        <li><a href="#">在庫</a></li>
+        <li><a href="#">顧客</a></li>
+        <li><a href="#">設定</a></li>
+      </ul>
+    </nav>
+    <div class="side-foot">灯台珈琲</div>
+  </aside>
+
+  <div class="content">
+    <header class="top">
+      <div class="shop">灯台珈琲<span>自家焙煎コーヒー豆の通販</span></div>
+      <div class="today">2026年10月16日(金) 10:30</div>
+      <div class="user">
+        <span class="avatar" aria-hidden="true">森</span>
+        <div>森田 恵<small>運営担当</small></div>
+      </div>
+    </header>
+
+    <main id="main">
+      <h1>注文管理</h1>
+
+      <div class="today-grid">
+        <section class="panel" aria-labelledby="urgentTitle">
+          <div class="panel-head">
+            <span class="big" id="urgentCount">7</span>
+            <div>
+              <h2 id="urgentTitle">要対応の注文</h2>
+              <span class="sub" id="urgentSub">優先度の高い順</span>
+            </div>
+          </div>
+          <ul class="urgent" id="urgentList"></ul>
+        </section>
+
+        <section class="panel ready" aria-labelledby="readyTitle">
+          <div class="panel-head">
+            <span class="big" id="readyCount">2</span>
+            <div>
+              <h2 id="readyTitle">発送準備に進められる注文</h2>
+              <span class="sub">確認済み・入金済み / 代引き</span>
+            </div>
+          </div>
+          <ul id="readyList"></ul>
+          <div class="actions"><button type="button" class="btn primary" id="readySelect">この注文を選択する</button></div>
+        </section>
+      </div>
+
+      <section id="list" aria-labelledby="listTitle">
+        <div class="list-head">
+          <h2 id="listTitle">注文一覧</h2>
+          <span class="count" id="resultCount" role="status"></span>
+        </div>
+
+        <div class="toolbar">
+          <div class="tabs" role="group" aria-label="注文状態で絞り込み" id="tabs"></div>
+          <div class="search">
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.8" stroke="currentColor" stroke-width="1.8"/><path d="M10.6 10.6 14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <label class="sr-only" for="q">注文番号・購入者名・商品名で検索</label>
+            <input type="search" id="q" placeholder="注文番号・購入者名・商品名" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="table-wrap" id="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="c-chk"><label><input type="checkbox" id="selAll" aria-label="表示中の注文をすべて選択"></label></th>
+                <th class="c-no">注文番号</th>
+                <th class="c-at">注文日時</th>
+                <th class="c-buyer">購入者</th>
+                <th class="c-item">商品</th>
+                <th class="c-amt num">金額</th>
+                <th class="c-pay">支払い状態</th>
+                <th class="c-st">注文状態</th>
+                <th class="c-ship">配送方法</th>
+                <th class="c-due">発送期限</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <div class="empty" id="empty" hidden>
+            <strong>条件に合う注文はありません</strong>
+            <p>絞り込みや検索キーワードを変えてみてください。</p>
+            <button type="button" class="btn" id="resetBtn">絞り込みを解除</button>
+          </div>
+        </div>
+
+        <div class="bulk" id="bulk" hidden>
+          <span class="cnt" id="bulkCount"></span>
+          <p class="why-no" id="bulkMsg" role="status"></p>
+          <button type="button" class="btn ghost" id="bulkClear">選択を解除</button>
+          <button type="button" class="btn primary" id="bulkGo">発送準備中にする</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" hidden>
+  <div class="d-head">
+    <button type="button" class="back" id="dBack">← 一覧に戻る</button>
+    <div class="d-title"><h2 id="dTitle"></h2><span id="dChips"></span></div>
+  </div>
+  <div class="d-body" id="dBody"></div>
+  <div class="d-foot">
+    <p id="dNote"></p>
+    <button type="button" class="btn primary" id="dGo">発送準備中にする</button>
+  </div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- Fixed "today" (the device clock is never used) ----
+  var TODAY = { m: 10, d: 16 };
+  var TODAY_KEY = TODAY.m * 100 + TODAY.d;
+
+  var PRICES = {
+    '深煎りブレンド 200g': 1480, '浅煎りブレンド 200g': 1480, 'エチオピア 200g': 1780,
+    'カフェインレス 200g': 1600, 'ドリップバッグ 10個入': 1620, 'ギフトセット(豆2種)': 4800
+  };
+  var FEES = { '宅配便': 600, 'メール便': 200 };
+
+  function o(id, at, buyer, dest, items, total, method, pay, status, ship, payDue, shipDue, note) {
+    return { id: id, at: at, buyer: buyer, dest: dest, items: items, total: total, method: method, pay: pay, status: status, ship: ship, payDue: payDue, shipDue: shipDue, note: note };
+  }
+  var ORDERS = [
+    o('10248', '10/16 09:52', '山本 葵', '東京都 世田谷区', [['深煎りブレンド 200g', 2]], 3560, 'クレジットカード', '入金済み', '新規', '宅配便', '—', '10/18', ''),
+    o('10247', '10/16 08:15', '佐々木 大輔', '神奈川県 横浜市', [['ドリップバッグ 10個入', 1]], 1820, 'コンビニ払い', '未入金', '新規', 'メール便', '10/19', '入金後', ''),
+    o('10246', '10/16 01:40', '中村 由衣', '大阪府 大阪市', [['ギフトセット(豆2種)', 1]], 5400, 'クレジットカード', '決済エラー', '新規', '宅配便', '—', '—', 'カードの承認エラー。購入者への連絡が必要'),
+    o('10245', '10/15 21:03', '小林 誠', '埼玉県 さいたま市', [['エチオピア 200g', 1], ['浅煎りブレンド 200g', 1]], 3860, 'クレジットカード', '入金済み', '確認済み', '宅配便', '—', '10/17', '配達日時指定: 10/18 午前'),
+    o('10244', '10/15 18:47', '加藤 美咲', '愛知県 名古屋市', [['ドリップバッグ 10個入', 3]], 5460, 'クレジットカード', '入金済み', '確認済み', '宅配便', '—', '10/17', 'ギフト包装'),
+    o('10243', '10/15 12:30', '吉田 健太', '福岡県 福岡市', [['深煎りブレンド 200g', 1]], 1680, '銀行振込', '未入金', '確認済み', 'メール便', '10/18', '入金後', ''),
+    o('10242', '10/15 10:05', '山田 花子', '北海道 札幌市', [['カフェインレス 200g', 2]], 4130, '代金引換', '代引き', '発送準備中', '宅配便', '—', '10/16', ''),
+    o('10241', '10/14 22:18', '松本 拓也', '千葉県 船橋市', [['浅煎りブレンド 200g', 1]], 1680, 'クレジットカード', '入金済み', '発送準備中', 'メール便', '—', '10/16', ''),
+    o('10240', '10/14 15:40', '井上 さやか', '京都府 京都市', [['ギフトセット(豆2種)', 2]], 9600, 'クレジットカード', '入金済み', '発送準備中', '宅配便', '—', '10/15', 'のし「御礼」。発送期限を1日超過'),
+    o('10239', '10/14 09:12', '木村 涼', '宮城県 仙台市', [['エチオピア 200g', 2]], 4160, '銀行振込', '未入金', '確認済み', '宅配便', '10/17', '入金後', ''),
+    o('10238', '10/13 20:55', '林 直樹', '広島県 広島市', [['ドリップバッグ 10個入', 1]], 1820, 'コンビニ払い', '未入金', '確認済み', 'メール便', '10/16', '入金後', '支払期限が今日'),
+    o('10237', '10/13 14:22', '清水 愛', '東京都 杉並区', [['深煎りブレンド 200g', 2], ['ドリップバッグ 10個入', 1]], 5180, 'クレジットカード', '入金済み', '発送済み', '宅配便', '—', '10/15', '10/15 発送'),
+    o('10236', '10/13 11:08', '山口 翔', '兵庫県 神戸市', [['浅煎りブレンド 200g', 1]], 1680, 'クレジットカード', '入金済み', '発送済み', 'メール便', '—', '10/15', '10/14 発送'),
+    o('10235', '10/12 19:30', '森 千尋', '静岡県 静岡市', [['カフェインレス 200g', 1]], 2530, '代金引換', '代引き', '発送済み', '宅配便', '—', '10/14', '10/14 発送'),
+    o('10234', '10/12 16:44', '池田 悠', '東京都 渋谷区', [['ギフトセット(豆2種)', 1]], 5400, 'クレジットカード', '返金済み', 'キャンセル', '宅配便', '—', '—', '購入者都合のキャンセル(10/13)'),
+    o('10233', '10/12 10:02', '橋本 結衣', '長野県 松本市', [['エチオピア 200g', 1]], 2380, '銀行振込', '入金済み', '発送済み', '宅配便', '—', '10/15', '10/13 入金、10/14 発送'),
+    o('10232', '10/11 22:40', '阿部 健', '新潟県 新潟市', [['深煎りブレンド 200g', 3]], 5040, 'クレジットカード', '入金済み', '配達完了', '宅配便', '—', '10/13', '10/14 配達完了'),
+    o('10231', '10/11 13:15', '石川 遥', '東京都 練馬区', [['ドリップバッグ 10個入', 2]], 3440, 'コンビニ払い', '入金済み', '配達完了', 'メール便', '—', '10/14', '10/13 配達完了')
+  ];
+
+  var STATUS_TABS = ['すべて', '要対応', '新規', '確認済み', '発送準備中', '発送済み', '配達完了', 'キャンセル'];
+  var PAY_GLYPH = { '入金済み': '✓', '未入金': '…', '決済エラー': '!', '代引き': '¥', '返金済み': '↩' };
+  var ST_GLYPH = { '新規': '●', '確認済み': '◐', '発送準備中': '▣', '発送済み': '➜', '配達完了': '✓', 'キャンセル': '✕' };
+  var UNSHIPPED = ['新規', '確認済み', '発送準備中'];
+
+  // ---- Helpers ----
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function yen(n) { return '¥' + n.toLocaleString('en-US'); }
+  function key(md) { // "10/16" -> 1016, otherwise null
+    var m = /^(\d+)\/(\d+)$/.exec(md);
+    return m ? (+m[1]) * 100 + (+m[2]) : null;
+  }
+  function daysBetween(md) { // days from md to today (positive = past)
+    var m = /^(\d+)\/(\d+)$/.exec(md);
+    var a = new Date(2026, +m[1] - 1, +m[2]);
+    var b = new Date(2026, TODAY.m - 1, TODAY.d);
+    return Math.round((b - a) / 86400000);
+  }
+
+  // Reasons an order needs attention (an order may have several)
+  function reasons(ord) {
+    var r = [];
+    var due = key(ord.shipDue);
+    if (UNSHIPPED.indexOf(ord.status) >= 0 && due !== null && due <= TODAY_KEY) {
+      if (due < TODAY_KEY) r.push({ rank: 0, hot: true, label: '発送期限を' + daysBetween(ord.shipDue) + '日超過', short: '期限超過', action: '最優先で発送する' });
+      else r.push({ rank: 1, hot: false, label: '発送期限は今日', short: '今日発送', action: '今日中に発送する' });
+    }
+    if (ord.pay === '決済エラー') r.push({ rank: 2, hot: false, label: '決済エラー', short: '決済エラー', action: '購入者に連絡する' });
+    if (ord.status === '新規') r.push({ rank: 3, hot: false, label: '新規(未確認)', short: '未確認', action: '内容を確認する' });
+    var pd = key(ord.payDue);
+    if (ord.pay === '未入金' && pd !== null && pd <= TODAY_KEY) r.push({ rank: 4, hot: false, label: '支払期限は今日', short: '入金確認', action: '入金を確認する' });
+    r.sort(function (a, b) { return a.rank - b.rank; });
+    return r;
+  }
+  function canShip(ord) {
+    return ord.status === '確認済み' && (ord.pay === '入金済み' || ord.pay === '代引き');
+  }
+  function whyNot(ord) {
+    if (canShip(ord)) return '';
+    if (ord.status === '確認済み') return ord.pay === '未入金' ? '入金待ち' : ord.pay;
+    return { '新規': '内容が未確認', '発送準備中': 'すでに発送準備中', '発送済み': '発送済み', '配達完了': '配達完了', 'キャンセル': 'キャンセル済み' }[ord.status];
+  }
+  function byId(id) { return ORDERS.filter(function (x) { return x.id === id; })[0]; }
+  function urgentOrders() {
+    return ORDERS.filter(function (x) { return reasons(x).length; }).sort(function (a, b) {
+      return reasons(a)[0].rank - reasons(b)[0].rank || (a.id < b.id ? 1 : -1);
+    });
+  }
+
+  // ---- State ----
+  var state = { filter: 'すべて', q: '', selected: {}, open: null };
+  var lastTrigger = null;
+
+  function matchesFilter(x) {
+    if (state.filter === 'すべて') return true;
+    if (state.filter === '要対応') return reasons(x).length > 0;
+    return x.status === state.filter;
+  }
+  function matchesQuery(x) {
+    var q = state.q.trim().toLowerCase();
+    if (!q) return true;
+    var hay = ('#' + x.id + ' ' + x.buyer + ' ' + x.items.map(function (i) { return i[0]; }).join(' ')).toLowerCase();
+    return hay.indexOf(q) >= 0;
+  }
+  function visible() { return ORDERS.filter(function (x) { return matchesFilter(x) && matchesQuery(x); }); }
+  function selectedIds() { return Object.keys(state.selected).filter(function (k) { return state.selected[k]; }); }
+
+  // ---- Renderers ----
+  function stChip(s) { return '<span class="st st-' + s + '"><span aria-hidden="true">' + ST_GLYPH[s] + '</span>' + s + '</span>'; }
+  function payChip(s) { return '<span class="pay pay-' + s + '"><i aria-hidden="true">' + PAY_GLYPH[s] + '</i>' + s + '</span>'; }
+
+  function dueCell(x) {
+    var due = key(x.shipDue);
+    if (UNSHIPPED.indexOf(x.status) >= 0 && due !== null) {
+      if (due < TODAY_KEY) return '<span class="due-hot">超過 ' + x.shipDue + '</span>';
+      if (due === TODAY_KEY) return '<span class="due-hot">今日 ' + x.shipDue + '</span>';
+      return '<span class="nowrap">' + x.shipDue + '</span>';
+    }
+    if (UNSHIPPED.indexOf(x.status) >= 0) return x.shipDue; // "入金後" or "—"
+    return '<span class="muted">' + esc(x.shipDue) + '</span>';
+  }
+
+  function renderUrgent() {
+    var list = urgentOrders();
+    $('urgentCount').textContent = list.length;
+    $('urgentCount').classList.toggle('zero', list.length === 0);
+    $('navBadge').textContent = list.length;
+    $('navBadge').style.display = list.length ? '' : 'none';
+    $('urgentSub').textContent = list.length ? '優先度の高い順に並べています' : '';
+    if (!list.length) {
+      $('urgentList').innerHTML = '<li style="display:block"><p class="empty-note">要対応の注文はありません。</p></li>';
+      return;
+    }
+    $('urgentList').innerHTML = list.map(function (x) {
+      var whys = reasons(x).map(function (r) {
+        return '<span class="why"><span class="flag' + (r.hot ? ' hot' : '') + '">' + esc(r.label) + '</span>' + esc(r.action) + '</span>';
+      }).join('');
+      return '<li>' +
+        '<span class="no">#' + x.id + '</span>' +
+        '<span class="who">' + esc(x.buyer) + '</span>' +
+        '<span class="whys">' + whys + '</span>' +
+        '<button type="button" class="link-btn" data-open="' + x.id + '" aria-label="注文 #' + x.id + ' の詳細を見る">詳細</button>' +
+        '</li>';
+    }).join('');
+  }
+
+  function renderReady() {
+    var list = ORDERS.filter(canShip);
+    $('readyCount').textContent = list.length;
+    $('readyList').innerHTML = list.length ? list.map(function (x) {
+      return '<li><span><strong>#' + x.id + '</strong> ' + esc(x.buyer) + '</span><span class="muted">期限 ' + x.shipDue + '</span></li>';
+    }).join('') : '<li style="display:block"><span class="muted">現在はありません。</span></li>';
+    $('readySelect').hidden = !list.length;
+  }
+
+  function renderTabs() {
+    var counts = {};
+    STATUS_TABS.forEach(function (t) {
+      counts[t] = t === 'すべて' ? ORDERS.length : t === '要対応' ? urgentOrders().length : ORDERS.filter(function (x) { return x.status === t; }).length;
+    });
+    $('tabs').innerHTML = STATUS_TABS.map(function (t) {
+      return '<button type="button" class="tab' + (t === '要対応' ? ' urgent-tab' : '') + '" data-filter="' + t + '" aria-pressed="' + (state.filter === t) + '">' +
+        t + ' <span class="n">' + counts[t] + '</span></button>';
+    }).join('');
+  }
+
+  function renderRows() {
+    var list = visible();
+    $('rows').innerHTML = list.map(function (x) {
+      var rs = reasons(x);
+      var tags = rs.length ? '<div class="tags">' + rs.map(function (r) {
+        return '<span class="flag' + (r.hot ? ' hot' : '') + '">' + esc(r.short) + '</span>';
+      }).join('') + '</div>' : '';
+      var done = ['発送済み', '配達完了', 'キャンセル'].indexOf(x.status) >= 0;
+      var sel = !!state.selected[x.id];
+      return '<tr data-id="' + x.id + '" class="' + (sel ? 'sel ' : '') + (done ? 'done' : '') + '">' +
+        '<td class="c-chk"><input type="checkbox" data-sel="' + x.id + '" aria-label="注文 #' + x.id + ' を選択"' + (sel ? ' checked' : '') + '></td>' +
+        '<td class="c-no"><button type="button" class="order-btn" data-open="' + x.id + '" aria-label="注文 #' + x.id + ' の詳細を開く">#' + x.id + '</button>' + tags + '</td>' +
+        '<td class="c-at nowrap">' + x.at + '</td>' +
+        '<td class="c-buyer nowrap">' + esc(x.buyer) + '</td>' +
+        '<td class="c-item">' + x.items.map(function (i) { return '<span class="item">' + esc(i[0]) + ' ×' + i[1] + '</span>'; }).join('') + '</td>' +
+        '<td class="c-amt num amt">' + yen(x.total) + '</td>' +
+        '<td class="c-pay">' + payChip(x.pay) + '</td>' +
+        '<td class="c-st">' + stChip(x.status) + (canShip(x) ? '<br><span class="go">発送準備OK</span>' : '') + '</td>' +
+        '<td class="c-ship nowrap">' + x.ship + '</td>' +
+        '<td class="c-due nowrap">' + dueCell(x) + '</td>' +
+        '</tr>';
+    }).join('');
+    $('empty').hidden = list.length > 0;
+    document.querySelector('thead').style.display = list.length ? '' : 'none';
+    $('resultCount').textContent = list.length + '件を表示(全' + ORDERS.length + '件)';
+  }
+
+  function updateSelectionUI() {
+    var vis = visible();
+    var ids = selectedIds();
+    document.querySelectorAll('#rows tr').forEach(function (tr) {
+      tr.classList.toggle('sel', !!state.selected[tr.getAttribute('data-id')]);
+    });
+    var n = vis.filter(function (x) { return state.selected[x.id]; }).length;
+    var all = $('selAll');
+    all.checked = vis.length > 0 && n === vis.length;
+    all.indeterminate = n > 0 && n < vis.length;
+
+    var bulk = $('bulk');
+    bulk.hidden = ids.length === 0;
+    if (!ids.length) return;
+    $('bulkCount').textContent = ids.length + '件を選択中';
+    var bad = ids.map(byId).filter(function (x) { return !canShip(x); });
+    var msg = $('bulkMsg');
+    if (bad.length) {
+      msg.className = 'why-no';
+      msg.textContent = '発送準備に進めない注文が含まれています: ' + bad.map(function (x) { return '#' + x.id + '(' + whyNot(x) + ')'; }).join('、') + '。選択を外してください。';
+    } else {
+      msg.className = 'why-no ok';
+      msg.textContent = '選んだ注文は、すべて発送準備に進められます。';
+    }
+    $('bulkGo').disabled = bad.length > 0;
+  }
+
+  function pruneSelection() {
+    var vis = {};
+    visible().forEach(function (x) { vis[x.id] = true; });
+    Object.keys(state.selected).forEach(function (k) { if (!vis[k]) delete state.selected[k]; });
+  }
+
+  function renderAll() {
+    renderUrgent(); renderReady(); renderTabs(); renderRows(); updateSelectionUI();
+  }
+
+  // ---- Detail drawer ----
+  function openDetail(id, trigger) {
+    var x = byId(id);
+    if (!x) return;
+    state.open = id;
+    lastTrigger = trigger || null;
+    renderDetail();
+    $('scrim').hidden = false;
+    $('drawer').hidden = false;
+    $('dBack').focus();
+  }
+  function closeDetail() {
+    state.open = null;
+    $('scrim').hidden = true;
+    $('drawer').hidden = true;
+    var t = lastTrigger && document.body.contains(lastTrigger) ? lastTrigger : null;
+    if (!t && lastTrigger && lastTrigger.getAttribute) {
+      t = document.querySelector('[data-open="' + lastTrigger.getAttribute('data-open') + '"]');
+    }
+    if (t) t.focus();
+  }
+  function renderDetail() {
+    var x = byId(state.open);
+    if (!x) return;
+    $('dTitle').textContent = '#' + x.id;
+    $('dChips').innerHTML = stChip(x.status) + ' ' + payChip(x.pay);
+
+    var sub = x.items.reduce(function (s, i) { return s + PRICES[i[0]] * i[1]; }, 0);
+    var shipFee = sub >= 5000 ? 0 : FEES[x.ship];
+    var cod = x.method === '代金引換' ? 330 : 0;
+    var lines = x.items.map(function (i) {
+      return '<tr><td>' + esc(i[0]) + '</td><td class="num">' + yen(PRICES[i[0]]) + '</td><td class="num">' + i[1] + '</td><td class="num">' + yen(PRICES[i[0]] * i[1]) + '</td></tr>';
+    }).join('');
+
+    var rs = reasons(x);
+    var todo = rs.length ? '<div class="d-todo"><h3>要対応</h3><ul>' + rs.map(function (r) {
+      return '<li><span class="flag' + (r.hot ? ' hot' : '') + '">' + esc(r.label) + '</span> ' + esc(r.action) + '</li>';
+    }).join('') + '</ul></div>' : '';
+
+    $('dBody').innerHTML = todo +
+      '<section class="d-sec"><h3>購入者・配送先</h3><dl class="kv">' +
+        '<dt>購入者</dt><dd>' + esc(x.buyer) + '</dd>' +
+        '<dt>配送先</dt><dd>' + esc(x.dest) + '</dd>' +
+        '<dt>配送方法</dt><dd>' + x.ship + '</dd>' +
+        '<dt>注文日時</dt><dd>2026/' + x.at + '</dd></dl></section>' +
+      '<section class="d-sec"><h3>商品の明細</h3><table class="lines"><thead><tr><th>商品</th><th class="num">単価</th><th class="num">数量</th><th class="num">小計</th></tr></thead><tbody>' + lines + '</tbody><tfoot>' +
+        '<tr><td colspan="3">商品合計</td><td class="num">' + yen(sub) + '</td></tr>' +
+        '<tr><td colspan="3">送料(' + x.ship + ')</td><td class="num">' + (shipFee ? yen(shipFee) : '無料') + '</td></tr>' +
+        (cod ? '<tr><td colspan="3">代引き手数料</td><td class="num">' + yen(cod) + '</td></tr>' : '') +
+        '<tr class="sum"><td colspan="3">合計(税込)</td><td class="num">' + yen(x.total) + '</td></tr></tfoot></table></section>' +
+      '<section class="d-sec"><h3>支払い・期限</h3><dl class="kv">' +
+        '<dt>支払方法</dt><dd>' + x.method + '</dd>' +
+        '<dt>支払い状態</dt><dd>' + payChip(x.pay) + '</dd>' +
+        '<dt>支払期限</dt><dd>' + x.payDue + '</dd>' +
+        '<dt>発送期限</dt><dd>' + dueCell(x) + '</dd></dl></section>' +
+      '<section class="d-sec"><h3>備考</h3><p>' + (x.note ? esc(x.note) : '<span class="muted">なし</span>') + '</p></section>';
+
+    var ok = canShip(x);
+    $('dGo').hidden = !(ok || x.status === '新規' || x.status === '確認済み');
+    $('dGo').disabled = !ok;
+    $('dNote').textContent = ok ? 'この注文は発送準備に進められます。' : (x.status === '新規' || x.status === '確認済み') ? '発送準備に進めません: ' + whyNot(x) : '';
+  }
+
+  // ---- Actions ----
+  function toast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.textContent = ''; }, 3500);
+  }
+  function ship(ids) {
+    var targets = ids.map(byId).filter(canShip);
+    if (!targets.length || targets.length !== ids.length) return;
+    targets.forEach(function (x) { x.status = '発送準備中'; delete state.selected[x.id]; });
+    pruneSelection();
+    renderAll();
+    if (state.open) renderDetail();
+    toast(targets.length + '件を「発送準備中」にしました(' + targets.map(function (x) { return '#' + x.id; }).join('、') + ')');
+  }
+
+  // ---- Events ----
+  $('menuBtn').addEventListener('click', function () {
+    var open = $('nav').classList.toggle('open');
+    this.setAttribute('aria-expanded', String(open));
+  });
+
+  $('tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-filter]');
+    if (!b) return;
+    state.filter = b.getAttribute('data-filter');
+    pruneSelection(); renderTabs(); renderRows(); updateSelectionUI();
+    var again = document.querySelector('[data-filter="' + state.filter + '"]');
+    if (again) again.focus();
+  });
+
+  $('q').addEventListener('input', function () {
+    state.q = this.value;
+    pruneSelection(); renderRows(); updateSelectionUI();
+  });
+
+  $('resetBtn').addEventListener('click', function () {
+    state.filter = 'すべて'; state.q = ''; $('q').value = '';
+    renderTabs(); renderRows(); updateSelectionUI();
+  });
+
+  $('rows').addEventListener('change', function (e) {
+    var cb = e.target.closest('[data-sel]');
+    if (!cb) return;
+    state.selected[cb.getAttribute('data-sel')] = cb.checked;
+    updateSelectionUI();
+  });
+  $('rows').addEventListener('click', function (e) {
+    if (e.target.closest('input')) return;
+    var tr = e.target.closest('tr[data-id]');
+    if (!tr) return;
+    var btn = tr.querySelector('.order-btn');
+    openDetail(tr.getAttribute('data-id'), btn);
+  });
+
+  $('selAll').addEventListener('change', function () {
+    var on = this.checked;
+    visible().forEach(function (x) { state.selected[x.id] = on; });
+    document.querySelectorAll('#rows [data-sel]').forEach(function (cb) { cb.checked = on; });
+    updateSelectionUI();
+  });
+
+  $('urgentList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-open]');
+    if (b) openDetail(b.getAttribute('data-open'), b);
+  });
+
+  $('readySelect').addEventListener('click', function () {
+    state.filter = '確認済み'; state.q = ''; $('q').value = '';
+    state.selected = {};
+    ORDERS.filter(canShip).forEach(function (x) { state.selected[x.id] = true; });
+    renderTabs(); renderRows(); updateSelectionUI();
+    $('list').scrollIntoView();
+    toast(selectedIds().length + '件を選択しました。下のバーから「発送準備中にする」を実行できます。');
+  });
+
+  $('bulkGo').addEventListener('click', function () { ship(selectedIds()); });
+  $('bulkClear').addEventListener('click', function () { state.selected = {}; renderRows(); updateSelectionUI(); });
+
+  $('dBack').addEventListener('click', closeDetail);
+  $('scrim').addEventListener('click', closeDetail);
+  $('dGo').addEventListener('click', function () { if (state.open) ship([state.open]); });
+
+  document.addEventListener('keydown', function (e) {
+    if (!state.open) return;
+    if (e.key === 'Escape') { closeDetail(); return; }
+    if (e.key === 'Tab') { // keep focus inside the dialog
+      var f = Array.prototype.filter.call($('drawer').querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])'), function (el) { return !el.disabled && el.offsetParent !== null; });
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
