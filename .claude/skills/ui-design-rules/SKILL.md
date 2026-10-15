@@ -1,0 +1,61 @@
+---
+name: ui-design-rules
+description: AIっぽい画一的なWeb UIを避け、目的・ユーザー・情報構造に合ったUIを作るためのルールとワークフロー。画面やUIの新規作成・作り直し、デザイン案の比較(3案)、デザイン仕様の出力、Baselineとの効果検証を頼まれたときに使う。
+---
+
+# UI Design Rules
+
+プロダクト固有の目的・ユーザー・情報構造に適した、意図のあるUIを作るためのSkill。
+Claude Codeの標準機能とMarkdownだけで動く。外部のAI APIや追加サービスには依存しない。
+
+このファイルは入口。詳細は下記のファイルに分割してあり、必要になった段階で読む。パスはこのSkillのディレクトリからの相対パス。
+
+## ファイル構成
+
+| 用途 | ファイル |
+|---|---|
+| 基本原則(Rule 01-05) | `rules/01-principles.md` |
+| アンチパターン | `rules/02-anti-patterns.md` |
+| 3案の生成プロトコル(Step 1-6) | `rules/03-design-protocol.md` |
+| 品質チェックリスト | `rules/04-quality-checklist.md` |
+| 実験方法(Baseline / Rules) | `rules/05-experiment.md` |
+| 開発方針(Phase 1-3) | `rules/06-roadmap.md` |
+| デザインブリーフ | `templates/design-brief.md` |
+| 3案の比較記録 | `templates/comparison.md` |
+| デザイン仕様 | `templates/design-spec.md` |
+| 実験ログ | `templates/experiment-log.md` |
+
+## 使い方の判断
+
+ユーザーの依頼に応じて入るところを選ぶ。
+
+- **画面を新しく作る / 作り直す** → 下の「基本フロー」。
+- **「ルールなしで作って」「Baselineで」と言われた** → このSkillのルールを使わず普段どおり作る。実験の記録だけ `rules/05-experiment.md` に従う。
+- **既存案の比較・採用理由の整理だけ** → `rules/03-design-protocol.md` の Step 5 と `templates/comparison.md`。
+- **採用案の仕様化だけ** → `rules/03-design-protocol.md` の Step 6 と `templates/design-spec.md`。
+- **ルール自体の改善** → `rules/` の該当ファイルを編集し、`rules/05-experiment.md` の記録を根拠にする。
+
+## 基本フロー
+
+1. `rules/01-principles.md` と `rules/02-anti-patterns.md` を読む。
+2. 要件を整理する。ブリーフ(`templates/design-brief.md`)が渡されていればそれを使う。なければ埋めてもらうか、仮定を明示して進める。重要な不明点を黙って確定しない。
+3. `rules/03-design-protocol.md` に従い、情報構造とレイアウトが異なる3案(A/B/C)を作る。
+4. 各案をブラウザで表示して検証する。表示できていないものを「確認済み」と報告しない。
+5. `templates/comparison.md` の形式で比較し、推奨案を示す。**最終決定はユーザーが行う。**
+6. ユーザーが採用案を決めたら、`templates/design-spec.md` の形式で仕様を出力する。
+
+## 守ること
+
+- **ユーザーの明示的な承認なしに、選定結果を本番実装へ統合しない。**
+- 実験用の画面は既存アプリと分離する(専用ディレクトリ・ルート)。既存ファイルを上書きしない。
+- 不要なライブラリや依存関係を追加しない。既存の技術スタックを尊重する。
+- 3案は同じ機能要件を満たす。色や角丸だけを変えた案は「3案」と見なさない。
+- アンチパターンは絶対禁止ではない。採用する場合は、目的と必要性を説明できること。
+- 要件が不明な場合は仮定を明示する。実データがないのにダミーの指標やグラフで見た目を埋めない。
+
+## 完了時の報告
+
+- 作成・変更したファイルの一覧
+- 各案の方向性と、実際に表示確認できた範囲(デスクトップ/モバイル、未確認の項目)
+- 置いた仮定と、ユーザーに確認したい点
+- 推奨案とその理由(決定はユーザー)
