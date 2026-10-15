@@ -6,22 +6,17 @@
 <title>注文管理 | Parcel</title>
 <style>
   :root {
-    --bg: #f5f1ea;
-    --surface: #fffdf9;
-    --ink: #231b14;
-    --muted: #5e5348;
-    --line: #ddd3c4;
-    --line-strong: #b9ac98;
-    --accent: #1d5666;
+    --bg: #f6f6f4;
+    --surface: #ffffff;
+    --ink: #17181a;
+    --muted: #5b5f66;
+    --line: #dcdde0;
+    --line-strong: #a9acb2;
+    --accent: #17181a;
     --accent-ink: #ffffff;
-    --accent-soft: #e2edf0;
-    --danger: #a8321e;
-    --danger-soft: #fbe9e3;
-    --ok: #1f4a36;
-    --ok-soft: #e3ece8;
-    --warn: #7a4b00;
-    --warn-soft: #fff4de;
-    --side-w: 208px;
+    --accent-soft: #e9eaed;
+    --danger: #c4290f;
+    --side-w: 184px;
     --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Noto Sans JP", Meiryo, system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
@@ -44,32 +39,31 @@
   .app { display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); min-height: 100vh; }
 
   .side {
-    background: var(--ink);
-    color: #efe6d8;
+    background: var(--surface);
+    border-right: 1px solid var(--line);
     position: sticky; top: 0; height: 100vh;
     display: flex; flex-direction: column;
-    padding: 22px 14px;
+    padding: 20px 12px;
   }
-  .brand { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 22px; }
-  .brand-name { font-size: 22px; font-weight: 800; letter-spacing: .02em; display: flex; align-items: baseline; gap: 8px; }
-  .brand-name small { font-size: 11px; font-weight: 500; color: #b9ac98; letter-spacing: .08em; }
+  .brand { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 20px; }
+  .brand-name { font-size: 20px; font-weight: 800; letter-spacing: .01em; display: flex; align-items: baseline; gap: 8px; }
+  .brand-name small { font-size: 11px; font-weight: 500; color: var(--muted); }
   .menu-btn { display: none; }
 
   .nav { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
   .nav a {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 9px 12px; border-radius: 6px;
-    color: #efe6d8; text-decoration: none; font-weight: 500;
+    padding: 9px 12px; border-radius: 4px;
+    color: var(--ink); text-decoration: none; font-weight: 500;
   }
-  .nav a:hover { background: #3a2f25; }
-  .nav a[aria-current="page"] { background: var(--bg); color: var(--ink); font-weight: 700; }
+  .nav a:hover { background: #eef0f2; }
+  .nav a[aria-current="page"] { background: var(--ink); color: #fff; font-weight: 700; }
   .nav .badge { font-size: 13px; font-weight: 700; }
-  .side :focus-visible { outline-color: #f5c77e; }
-  .side-foot { margin-top: auto; padding: 0 8px; font-size: 12px; color: #b9ac98; }
+  .side-foot { margin-top: auto; padding: 0 8px; font-size: 12px; color: var(--muted); }
 
   .top {
     display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-    padding: 12px 32px; border-bottom: 1px solid var(--line); background: var(--surface);
+    padding: 12px 24px; border-bottom: 1px solid var(--line); background: var(--surface);
   }
   .shop { font-weight: 700; font-size: 15px; }
   .shop span { font-weight: 500; color: var(--muted); font-size: 12px; margin-left: 8px; }
@@ -77,45 +71,23 @@
   .user { margin-left: auto; text-align: right; }
   .user small { display: block; color: var(--muted); font-size: 11px; line-height: 1.2; }
 
-  main { padding: 26px 32px 120px; max-width: 1400px; }
-  h1 { font-size: 22px; margin: 0 0 18px; letter-spacing: .01em; }
+  main { padding: 22px 24px 120px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: .01em; }
   h2 { font-size: 16px; margin: 0; }
 
-  /* ---------- Today ---------- */
-  .todo { margin-bottom: 36px; max-width: 980px; }
-  .todo h2 { font-size: 18px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
-  .urgent { list-style: none; margin: 0; padding: 0; }
-  .urgent li {
-    display: grid; grid-template-columns: 6rem 6.5rem minmax(0, 1fr) auto; gap: 4px 14px; align-items: baseline;
-    padding: 10px 0; border-bottom: 1px solid var(--line);
-  }
-  .urgent .no { font-weight: 800; }
-  .urgent .who { color: var(--muted); }
-  .whys { display: flex; flex-wrap: wrap; gap: 2px 20px; }
-  .why b { font-weight: 700; margin-right: 8px; }
-  .why.hot b { color: var(--danger); }
+/* ---------- Buttons ---------- */
   .flag { font-weight: 700; }
   .flag.hot { color: var(--danger); }
-  .link-btn {
-    background: none; border: 0; padding: 4px 2px; color: var(--accent); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
-  }
-  .empty-note { padding: 14px 0; color: var(--muted); margin: 0; }
-
-  .ready { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
-  .ready h3 { margin: 0; font-size: 14px; }
-  .ready ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 2px 18px; }
-  .ready .btn { min-height: 32px; padding: 3px 12px; }
-
   .btn {
-    border: 1px solid var(--line-strong); background: var(--surface); border-radius: 6px; padding: 7px 14px; font-weight: 700; min-height: 36px;
+    border: 1px solid var(--ink); background: var(--surface); border-radius: 4px; padding: 7px 14px; font-weight: 700; min-height: 36px;
   }
-  .btn:hover { background: #f3ece0; }
+  .btn:hover { background: #eef0f2; }
   .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  .btn.primary:hover { background: #164552; }
-  .btn:disabled { background: #e8e1d5; border-color: #cfc5b4; color: #6f655a; cursor: not-allowed; }
+  .btn.primary:hover { background: #3a3d42; }
+  .btn:disabled { background: #e4e6e9; border-color: #cdd0d5; color: #6a6e75; cursor: not-allowed; }
 
-  /* ---------- List ---------- */
-  .list-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; gap: 12px; flex-wrap: wrap; }
+    /* ---------- List ---------- */
+  .list-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
   .list-head .count { color: var(--muted); }
   .toolbar { display: flex; gap: 14px 20px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
   .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -124,9 +96,10 @@
     display: inline-flex; align-items: center; gap: 7px; font-weight: 500;
   }
   .tab .n { font-weight: 700; }
-  .tab:hover { background: #f3ece0; }
+  .tab:hover { background: #eef0f2; }
   .tab[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; font-weight: 700; }
   .search { margin-left: auto; position: relative; }
+  .toolbar .btn { min-height: 38px; }
   .search input {
     width: 300px; max-width: 100%; min-height: 38px; padding: 6px 12px 6px 34px;
     border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface);
@@ -134,11 +107,11 @@
   .search svg { position: absolute; left: 10px; top: 11px; width: 16px; height: 16px; color: var(--muted); pointer-events: none; }
 
   .table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; min-width: 980px; }
-  th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
-  thead th { font-size: 12px; font-weight: 700; color: var(--muted); background: #f1ebe0; white-space: nowrap; vertical-align: middle; }
+  table { width: 100%; border-collapse: collapse; min-width: 1120px; }
+  th, td { padding: 9px 8px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  thead th { font-size: 12px; font-weight: 700; color: var(--muted); background: #f0f1f3; white-space: nowrap; vertical-align: middle; }
   tbody tr { cursor: pointer; }
-  tbody tr:hover { background: #faf5ea; }
+  tbody tr:hover { background: #f7f8f9; }
   tbody tr:last-child td { border-bottom: 0; }
   tbody tr.sel { background: var(--accent-soft); }
   tbody tr.done td:not(.c-chk) { color: var(--muted); }
@@ -147,8 +120,11 @@
   input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); margin: 3px 0 0; cursor: pointer; }
   .order-btn { background: none; border: 0; padding: 0; font-weight: 800; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
   .order-btn:hover { color: var(--accent); }
-  .why-row { margin-top: 2px; font-size: 12px; color: var(--muted); }
-  .item { display: block; }
+  .c-todo { min-width: 200px; }
+  .tl { display: block; white-space: nowrap; }
+  .tl b { font-weight: 700; margin-right: 6px; }
+  .tl.hot b { color: var(--danger); }
+  .item { display: block; white-space: nowrap; }
   .amt { font-weight: 700; white-space: nowrap; }
   .nowrap { white-space: nowrap; }
   .due-hot { color: var(--danger); font-weight: 800; }
@@ -160,11 +136,11 @@
   .st { display: inline-block; padding: 0 10px; line-height: 22px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
   .st-新規 { background: var(--ink); color: #fff; }
   .st-確認済み { border-color: var(--ink); }
-  .st-発送準備中 { background: #e7ddcc; }
+  .st-発送準備中 { background: #e4e6e9; }
   .st-発送済み, .st-配達完了 { color: var(--muted); font-weight: 500; padding: 0; }
   .st-キャンセル { color: var(--muted); border: 1px dashed var(--line-strong); font-weight: 500; }
   .pay { display: inline-block; font-size: 12px; line-height: 20px; white-space: nowrap; border: 1px solid transparent; border-radius: 3px; padding: 0 7px; margin-left: -7px; }
-  .pay-未入金 { border-color: var(--warn); color: var(--warn); font-weight: 700; }
+  .pay-未入金 { border-color: var(--ink); color: var(--ink); font-weight: 700; }
   .pay-決済エラー { border-color: var(--danger); background: var(--danger); color: #fff; font-weight: 700; }
   .pay-返金済み { color: var(--muted); border: 1px dashed var(--line-strong); }
 
@@ -176,25 +152,25 @@
   .bulk {
     position: sticky; bottom: 14px; margin-top: 14px; z-index: 5;
     background: var(--ink); color: #fff; border-radius: 10px; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
-    box-shadow: 0 6px 24px rgba(35, 27, 20, .28);
+    box-shadow: 0 6px 24px rgba(23, 24, 26, .28);
   }
   .bulk[hidden] { display: none; }
   .bulk .cnt { font-weight: 800; }
-  .bulk .why-no { flex: 1 1 280px; color: #ffd9cf; font-size: 13px; margin: 0; }
-  .bulk .why-no.ok { color: #cfe8da; }
+  .bulk .why-no { flex: 1 1 280px; color: #ffcfc4; font-size: 13px; margin: 0; }
+  .bulk .why-no.ok { color: #d8dade; }
   .bulk .btn { margin-left: auto; }
   .bulk .btn.primary { background: #fff; border-color: #fff; color: var(--ink); }
-  .bulk .btn.primary:hover { background: #efe6d8; }
-  .bulk .btn:disabled { background: #4a3f34; border-color: #4a3f34; color: #cfc5b4; }
-  .bulk .btn.ghost { margin-left: 0; background: transparent; border-color: #8f8374; color: #fff; }
-  .bulk :focus-visible { outline-color: #f5c77e; }
+  .bulk .btn.primary:hover { background: #e4e6e9; }
+  .bulk .btn:disabled { background: #44474d; border-color: #44474d; color: #cdd0d5; }
+  .bulk .btn.ghost { margin-left: 0; background: transparent; border-color: #7d8087; color: #fff; }
+  .bulk :focus-visible { outline-color: #fff; }
 
   /* ---------- Detail drawer ---------- */
-  .scrim { position: fixed; inset: 0; background: rgba(35, 27, 20, .45); z-index: 40; }
+  .scrim { position: fixed; inset: 0; background: rgba(23, 24, 26, .45); z-index: 40; }
   .scrim[hidden], .drawer[hidden] { display: none; }
   .drawer {
     position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100vw); background: var(--surface); z-index: 50;
-    display: flex; flex-direction: column; box-shadow: -8px 0 30px rgba(35, 27, 20, .25);
+    display: flex; flex-direction: column; box-shadow: -8px 0 30px rgba(23, 24, 26, .25);
   }
   .d-head { padding: 14px 20px; border-bottom: 1px solid var(--line); }
   .back { background: none; border: 0; padding: 4px 0; color: var(--accent); font-weight: 700; margin-bottom: 6px; }
@@ -228,11 +204,11 @@
   /* ---------- Narrow screens ---------- */
   @media (max-width: 900px) {
     .app { grid-template-columns: minmax(0, 1fr); }
-    .side { position: sticky; top: 0; height: auto; z-index: 30; padding: 8px 14px; }
+    .side { position: sticky; top: 0; height: auto; z-index: 30; padding: 8px 14px; border-right: 0; border-bottom: 1px solid var(--line); }
     .brand { padding: 0; }
     .side-foot { display: none; }
     .menu-btn {
-      display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid #8f8374; color: #fff; border-radius: 6px; padding: 4px 12px; min-height: 40px; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid var(--ink); color: var(--ink); border-radius: 6px; padding: 4px 12px; min-height: 40px; font-weight: 700;
     }
     .nav { display: none; padding: 8px 0 6px; }
     .nav.open { display: grid; }
@@ -241,12 +217,9 @@
     .user small { display: none; }
     main { padding: 14px 14px 110px; }
     h1 { font-size: 16px; margin-bottom: 8px; }
-    .todo { margin-bottom: 26px; }
-    .todo h2 { font-size: 16px; padding-bottom: 6px; }
-    .urgent li { grid-template-columns: auto minmax(0, 1fr) auto; padding: 8px 0; gap: 2px 10px; }
-    .urgent .whys { grid-column: 1 / -1; grid-row: 2; }
-    .urgent .link-btn { grid-column: 3; grid-row: 1; }
     .search { margin-left: 0; width: 100%; }
+    .toolbar { gap: 8px; }
+    .toolbar .btn { width: 100%; }
     .search input { width: 100%; }
     .tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; margin: 0 -14px; padding: 0 14px 4px; width: calc(100% + 28px); }
     .tab { flex: 0 0 auto; }
@@ -261,12 +234,14 @@
     #tableWrap thead th.c-chk label { display: inline-flex; align-items: center; }
     #tableWrap tbody tr {
       display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; grid-template-areas:
-        "chk no st" "chk buyer amt" ". item item" ". pay due" ". at ship";
+        "chk no st" "chk buyer amt" ". todo todo" ". item item" ". pay due" ". at ship";
       gap: 3px 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 10px 4px; margin-bottom: 10px;
     }
     #tableWrap tbody tr.sel { background: var(--accent-soft); border-color: var(--accent); }
     #tableWrap tbody td { border: 0; padding: 0; text-align: left; }
     #tableWrap td.num { text-align: right; }
+    .c-todo { grid-area: todo; min-width: 0; padding: 2px 0 4px !important; }
+    .c-todo:empty { display: none !important; }
     .c-chk { grid-area: chk; width: auto; padding: 0 0 0 8px; }
     .c-no { grid-area: no; }
     .c-st { grid-area: st; justify-self: end; }
@@ -323,21 +298,9 @@
     </header>
 
     <main id="main">
-      <h1>注文管理</h1>
-
-      <section class="todo" aria-labelledby="urgentTitle">
-        <h2 id="urgentTitle">要対応の注文 <span id="urgentCount">7</span>件</h2>
-        <ul class="urgent" id="urgentList"></ul>
-        <div class="ready">
-          <h3 id="readyTitle">発送準備に進められる注文 <span id="readyCount">2</span>件</h3>
-          <ul id="readyList" aria-labelledby="readyTitle"></ul>
-          <button type="button" class="btn" id="readySelect">選択する</button>
-        </div>
-      </section>
-
       <section id="list" aria-labelledby="listTitle">
         <div class="list-head">
-          <h2 id="listTitle">注文一覧</h2>
+          <h1 id="listTitle">注文管理</h1>
           <span class="count" id="resultCount" role="status"></span>
         </div>
 
@@ -348,6 +311,7 @@
             <label class="sr-only" for="q">注文番号・購入者名・商品名で検索</label>
             <input type="search" id="q" placeholder="注文番号・購入者名・商品名" autocomplete="off">
           </div>
+          <button type="button" class="btn" id="readySelect">発送できる注文を選択</button>
         </div>
 
         <div class="table-wrap" id="tableWrap">
@@ -364,6 +328,7 @@
                 <th class="c-st">注文状態</th>
                 <th class="c-ship">配送方法</th>
                 <th class="c-due">発送期限</th>
+                <th class="c-todo">対応</th>
               </tr>
             </thead>
             <tbody id="rows"></tbody>
@@ -523,35 +488,13 @@
     return '<span class="muted">' + esc(x.shipDue) + '</span>';
   }
 
-function renderUrgent() {
-    var list = urgentOrders();
-    $('urgentCount').textContent = list.length;
-    $('navBadge').textContent = list.length;
-    $('navBadge').style.display = list.length ? '' : 'none';
-    if (!list.length) {
-      $('urgentList').innerHTML = '<li style="display:block"><p class="empty-note">要対応の注文はありません。</p></li>';
-      return;
-    }
-    $('urgentList').innerHTML = list.map(function (x) {
-      var whys = reasons(x).map(function (r) {
-        return '<span class="why' + (r.hot ? ' hot' : '') + '"><b>' + esc(r.label) + '</b>' + esc(r.action) + '</span>';
-      }).join('');
-      return '<li>' +
-        '<span class="no">#' + x.id + '</span>' +
-        '<span class="who">' + esc(x.buyer) + '</span>' +
-        '<span class="whys">' + whys + '</span>' +
-        '<button type="button" class="link-btn" data-open="' + x.id + '" aria-label="注文 #' + x.id + ' の詳細を見る">詳細</button>' +
-        '</li>';
-    }).join('');
-  }
-
-  function renderReady() {
-    var list = ORDERS.filter(canShip);
-    $('readyCount').textContent = list.length;
-    $('readyList').innerHTML = list.map(function (x) {
-      return '<li><strong>#' + x.id + '</strong> ' + esc(x.buyer) + '</li>';
-    }).join('');
-    $('readySelect').hidden = !list.length;
+function updateCounts() {
+    var n = urgentOrders().length;
+    $('navBadge').textContent = n;
+    $('navBadge').style.display = n ? '' : 'none';
+    var r = ORDERS.filter(canShip).length;
+    $('readySelect').textContent = '発送できる注文を選択(' + r + '件)';
+    $('readySelect').hidden = !r;
   }
 
     function renderTabs() {
@@ -565,32 +508,37 @@ function renderUrgent() {
     }).join('');
   }
 
+function rowHtml(x) {
+    var rs = reasons(x);
+    var todo = rs.map(function (r) {
+      return '<span class="tl' + (r.hot ? ' hot' : '') + '"><b>' + esc(r.label) + '</b>' + esc(r.action) + '</span>';
+    }).join('');
+    var done = ['発送済み', '配達完了', 'キャンセル'].indexOf(x.status) >= 0;
+    var sel = !!state.selected[x.id];
+    return '<tr data-id="' + x.id + '" class="' + (sel ? 'sel ' : '') + (done ? 'done' : '') + '">' +
+      '<td class="c-chk"><input type="checkbox" data-sel="' + x.id + '" aria-label="注文 #' + x.id + ' を選択"' + (sel ? ' checked' : '') + '></td>' +
+      '<td class="c-no"><button type="button" class="order-btn" data-open="' + x.id + '" aria-label="注文 #' + x.id + ' の詳細を開く">#' + x.id + '</button></td>' +
+      '<td class="c-at nowrap">' + x.at + '</td>' +
+      '<td class="c-buyer nowrap">' + esc(x.buyer) + '</td>' +
+      '<td class="c-item">' + x.items.map(function (i) { return '<span class="item">' + esc(i[0]) + ' ×' + i[1] + '</span>'; }).join('') + '</td>' +
+      '<td class="c-amt num amt">' + yen(x.total) + '</td>' +
+      '<td class="c-pay">' + payChip(x.pay) + '</td>' +
+      '<td class="c-st">' + stChip(x.status) + (canShip(x) ? '<span class="go">発送準備OK</span>' : '') + '</td>' +
+      '<td class="c-ship nowrap">' + x.ship + '</td>' +
+      '<td class="c-due nowrap">' + dueCell(x) + '</td>' +
+      '<td class="c-todo">' + todo + '</td>' +
+      '</tr>';
+  }
   function renderRows() {
     var list = visible();
-    $('rows').innerHTML = list.map(function (x) {
-      var rs = reasons(x);
-      var tags = rs.length ? '<div class="why-row">' + rs.map(function (r) { return esc(r.short); }).join('・') + '</div>' : '';
-      var done = ['発送済み', '配達完了', 'キャンセル'].indexOf(x.status) >= 0;
-      var sel = !!state.selected[x.id];
-      return '<tr data-id="' + x.id + '" class="' + (sel ? 'sel ' : '') + (done ? 'done' : '') + '">' +
-        '<td class="c-chk"><input type="checkbox" data-sel="' + x.id + '" aria-label="注文 #' + x.id + ' を選択"' + (sel ? ' checked' : '') + '></td>' +
-        '<td class="c-no"><button type="button" class="order-btn" data-open="' + x.id + '" aria-label="注文 #' + x.id + ' の詳細を開く">#' + x.id + '</button>' + tags + '</td>' +
-        '<td class="c-at nowrap">' + x.at + '</td>' +
-        '<td class="c-buyer nowrap">' + esc(x.buyer) + '</td>' +
-        '<td class="c-item">' + x.items.map(function (i) { return '<span class="item">' + esc(i[0]) + ' ×' + i[1] + '</span>'; }).join('') + '</td>' +
-        '<td class="c-amt num amt">' + yen(x.total) + '</td>' +
-        '<td class="c-pay">' + payChip(x.pay) + '</td>' +
-        '<td class="c-st">' + stChip(x.status) + (canShip(x) ? '<span class="go">発送準備OK</span>' : '') + '</td>' +
-        '<td class="c-ship nowrap">' + x.ship + '</td>' +
-        '<td class="c-due nowrap">' + dueCell(x) + '</td>' +
-        '</tr>';
-    }).join('');
+    var html = list.map(rowHtml).join('');
+    $('rows').innerHTML = html;
     $('empty').hidden = list.length > 0;
     document.querySelector('thead').style.display = list.length ? '' : 'none';
     $('resultCount').textContent = list.length + '件を表示(全' + ORDERS.length + '件)';
   }
 
-  function updateSelectionUI() {
+    function updateSelectionUI() {
     var vis = visible();
     var ids = selectedIds();
     document.querySelectorAll('#rows tr').forEach(function (tr) {
@@ -624,7 +572,7 @@ function renderUrgent() {
   }
 
   function renderAll() {
-    renderUrgent(); renderReady(); renderTabs(); renderRows(); updateSelectionUI();
+    updateCounts(); renderTabs(); renderRows(); updateSelectionUI();
   }
 
   // ---- Detail drawer ----
@@ -751,11 +699,6 @@ function renderUrgent() {
     visible().forEach(function (x) { state.selected[x.id] = on; });
     document.querySelectorAll('#rows [data-sel]').forEach(function (cb) { cb.checked = on; });
     updateSelectionUI();
-  });
-
-  $('urgentList').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-open]');
-    if (b) openDetail(b.getAttribute('data-open'), b);
   });
 
   $('readySelect').addEventListener('click', function () {

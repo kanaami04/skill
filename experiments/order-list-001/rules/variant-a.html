@@ -9,7 +9,7 @@
   --bg:#F3F4F6; --panel:#fff; --ink:#18202B; --ink2:#46505E; --mute:#5E6977;
   --line:#E2E6EB; --line2:#C9CFD7; --accent:#B93A0A; --hover:#F6F7F9; --sel:#EAF0F7;
   --header-h:52px;
-  --brand:#1F4E8C; --brand-d:#173D70; --brand-tint:#E8EFF8; --attn-tint:#FCEFE8;
+  --brand:#1F4E8C; --brand-d:#173D70; --brand-tint:#E8EFF8;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -123,10 +123,6 @@ table.list{width:100%;min-width:1040px;border-collapse:collapse}
 .pie.s3{background:conic-gradient(currentColor 0 75%,transparent 0)}
 .pie.s4{background:currentColor}
 .pie.sx{background:linear-gradient(135deg,transparent 42%,currentColor 42% 58%,transparent 58%)}
-.grp th{padding:14px 16px 8px;font-size:14px;font-weight:700;color:var(--ink2);border-bottom:1px solid var(--line2);white-space:normal}
-.grp.attn th{font-size:16px;font-weight:800;color:var(--accent);background:var(--attn-tint)}
-.grp.attn th .ic{width:18px;height:18px;margin-right:8px;vertical-align:-3px}
-.grp .cnt{margin-left:6px;font-weight:600;color:var(--ink2)}
 .empty{padding:48px 16px;text-align:center;color:var(--ink2)}
 .empty p{margin:0 0 4px}
 .empty .t{font-size:16px;font-weight:700;color:var(--ink)}
@@ -213,8 +209,6 @@ table.list{width:100%;min-width:1040px;border-collapse:collapse}
   .list td.c-due::before{content:"発送期限 ";color:var(--mute);font-weight:400}
   .list td.c-due.hot::before{color:var(--accent)}
   .list tr.is-sel{background:var(--sel)}
-  .list tr.grp{display:block}
-  .list tr.grp th{display:block;padding:14px 12px 8px}
 }
 </style>
 </head>
@@ -505,6 +499,7 @@ const Core = (() => {
 
 (() => {
   const S = Core.store, $ = (s) => document.querySelector(s);
+  S.filter = 'attention'; // 開いたとき、まず要対応を見せる
   const { esc, yen } = Core;
   const ICON = (id) => `<svg class="ic" aria-hidden="true"><use href="#${id}"/></svg>`;
   const REASON_ICON = { over: 'i-truck', today: 'i-truck', payerr: 'i-cardx', unpaid: 'i-coin', new: 'i-inbox' };
@@ -559,14 +554,9 @@ const Core = (() => {
   }
   function renderRows() {
     const list = Core.visible();
-    let html = '';
-    if (S.filter === 'all') {
-      const a = list.filter(Core.isAttention).sort(Core.byUrgency), r = list.filter((o) => !Core.isAttention(o));
-      if (a.length) html += `<tr class="grp attn"><th scope="colgroup" colspan="10">${ICON('i-alert')}要対応<span class="cnt">${a.length}件</span></th></tr>` + a.map(rowHTML).join('');
-      if (r.length) html += `<tr class="grp"><th scope="colgroup" colspan="10">その他の注文<span class="cnt">${r.length}件</span></th></tr>` + r.map(rowHTML).join('');
-    } else if (S.filter === 'attention') {
-      html = list.sort(Core.byUrgency).map(rowHTML).join('');
-    } else html = list.map(rowHTML).join('');
+    // 絞り込みはタブで行う。一覧は分割せず、1本のまま。要対応は緊急順、それ以外は新しい順
+    if (S.filter === 'attention') list.sort(Core.byUrgency);
+    const html = list.map(rowHTML).join('');
     $('#rows').innerHTML = html;
     const none = list.length === 0;
     $('#tablewrap').hidden = none; $('#empty').hidden = !none;
