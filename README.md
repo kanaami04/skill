@@ -3,6 +3,8 @@
 AIが生成するWeb UIにありがちな画一的なデザインを減らすための、Claude Code用Skillとルール集。
 Skill・Markdown・テンプレートだけで動き、外部のAI APIには依存しない。
 
+この仕組みが担当するのは、**本実装の前に画面を決める段階**。単体のHTML/CSS/JSで画面案を3案作って比べ、採用案をデザイン仕様にまとめる。本実装は仕様が決まってから、別の作業として行う。
+
 ## 構成
 
 ```
@@ -50,13 +52,13 @@ Skill・Markdown・テンプレートだけで動き、外部のAI APIには依�
    ```
    品質の5段階の基準は、生成を見る前に決めておく。
 4. **Baseline を作る。** 新しいセッションで、Skill を使わずに依頼する。
-   > `experiments/<実験ID>/brief.md` の画面を `experiments/<実験ID>/baseline/` に作って。ui-design-rules のSkillは使わないで。
+   > `experiments/<実験ID>/brief.md` の画面を `experiments/<実験ID>/baseline/index.html` に作って。ui-design-rules のSkillは使わないで。
 
    開始時刻・終了時刻、修正指示ごとの回数を実験ログに記録する。
 5. **Rules を作る。** 別の新しいセッションで依頼する。
    > `/ui-design-rules experiments/<実験ID>/brief.md の画面を作って`
 
-   3案が `experiments/<実験ID>/a-clarity/` などにでき、`comparison.md` に比較が出る。採用案を決めて伝えると `design-spec.md` が出る。
+   3案が `experiments/<実験ID>/rules/variant-a.html` などにでき、`comparison.md` に比較が出る。採用案を決めて伝えると `design-spec.md` が出る。
 6. **記録する。** 両方のスクリーンショットを `screenshots/` に保存し、実験ログの計測表・採用理由・気づきを埋める。
 7. **2つ目以降の画面で繰り返す。** 1画面で結論を出さない。気づきに応じて `rules/` を直す。
 
