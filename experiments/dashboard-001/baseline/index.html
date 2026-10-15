@@ -6,24 +6,18 @@
 <title>ダッシュボード | Northstar</title>
 <style>
 :root {
-  --bg: #f4f6f9;
+  --bg: #f6f5f2;
   --surface: #ffffff;
-  --border: #e2e6ec;
-  --text: #1c2430;
+  --border: #d6d9de;
+  --text: #16202e;
   --text-sub: #4b5565;
   --accent: #2a4fb8;
-  --accent-bg: #eaf0fd;
   --side-bg: #14213d;
   --side-text: #c9d3e6;
   --danger: #b42318;
-  --danger-bg: #fdecea;
   --warn: #8a3b0a;
-  --warn-bg: #fff4e0;
   --ok: #05603a;
-  --ok-bg: #e6f6ee;
   --hold: #475467;
-  --hold-bg: #eceff3;
-  --radius: 8px;
   --font: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Segoe UI", sans-serif;
 }
 * { box-sizing: border-box; }
@@ -47,7 +41,7 @@ button { font: inherit; color: inherit; }
 }
 .skip-link {
   position: absolute; left: 8px; top: -48px; z-index: 100;
-  background: #fff; padding: 8px 12px; border-radius: 6px; border: 2px solid var(--accent);
+  background: #fff; padding: 8px 12px; border-radius: 4px; border: 2px solid var(--accent);
 }
 .skip-link:focus { top: 8px; }
 
@@ -64,17 +58,15 @@ button { font: inherit; color: inherit; }
 .nav-list { display: grid; gap: 2px; }
 .nav-link {
   display: flex; align-items: center; gap: 12px;
-  padding: 9px 10px; border-radius: 6px;
+  padding: 9px 10px; border-radius: 4px;
   color: var(--side-text); text-decoration: none; font-size: 14px;
 }
 .nav-link svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .nav-link:hover { background: rgba(255,255,255,.08); color: #fff; }
-.nav-link[aria-current="page"] { background: rgba(143,176,255,.2); color: #fff; font-weight: 700; }
-.nav-link .nav-count {
-  margin-left: auto; min-width: 22px; text-align: center;
-  background: rgba(255,255,255,.14); color: #fff; border-radius: 10px; padding: 0 7px; font-size: 12px;
-}
+.nav-link[aria-current="page"] { background: #fff; color: var(--side-bg); font-weight: 700; }
+.nav-link .nav-count { margin-left: auto; min-width: 22px; text-align: center; font-size: 12px; font-weight: 700; }
 .sidebar :focus-visible { outline-color: #fff; }
+.sidebar .nav-link[aria-current="page"]:focus-visible { outline-color: #8fb0ff; }
 
 .main { min-width: 0; }
 .topbar {
@@ -84,7 +76,7 @@ button { font: inherit; color: inherit; }
 }
 .menu-btn {
   display: none; align-items: center; justify-content: center;
-  width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 8px; background: #fff; cursor: pointer;
+  width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 4px; background: #fff; cursor: pointer;
 }
 .menu-btn svg { width: 22px; height: 22px; stroke: var(--text); fill: none; stroke-width: 2; stroke-linecap: round; }
 .topbar-brand { display: none; font-weight: 700; font-size: 16px; }
@@ -96,134 +88,133 @@ button { font: inherit; color: inherit; }
 .today-date .short { display: none; }
 .user { display: flex; align-items: center; gap: 10px; }
 .avatar {
-  width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff;
+  width: 32px; height: 32px; border-radius: 50%; background: var(--side-bg); color: #fff;
   display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none;
 }
 .user-name { font-size: 13px; line-height: 1.3; white-space: nowrap; }
 .user-name small { display: block; color: var(--text-sub); font-size: 11px; }
 
-.content { padding: 24px 32px 48px; max-width: 1280px; }
-.page-head { margin-bottom: 20px; }
+.content { padding: 28px 32px 56px; max-width: 1280px; }
+.page-head { margin-bottom: 28px; }
 .page-head h1 { font-size: 22px; line-height: 1.3; }
 .summary { margin-top: 4px; color: var(--text-sub); font-size: 14px; }
 .summary b { color: var(--text); font-size: 15px; }
 
-.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
-.col { display: grid; gap: 24px; min-width: 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 40px; align-items: start; }
+.col { display: grid; gap: 36px; min-width: 0; }
 
-/* ---------- panels ---------- */
-.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
-.panel-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 18px 10px; }
+/* ---------- sections (枠なし。見出しと余白で区切る) ---------- */
+.panel-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 0 0 8px; border-bottom: 1px solid var(--border); }
 .panel-head h2 { font-size: 16px; line-height: 1.4; }
 .panel-head .sub { color: var(--text-sub); font-size: 12px; }
-.count-pill {
-  display: inline-block; min-width: 26px; text-align: center; padding: 0 9px; border-radius: 12px;
-  background: var(--hold-bg); color: var(--text); font-size: 12px; font-weight: 700;
-}
-.count-pill.alert { background: var(--danger-bg); color: var(--danger); }
-.panel-body { padding: 0 18px 14px; }
-.panel.priority { border-color: #c8d3ee; box-shadow: inset 4px 0 0 var(--accent); }
+.count-pill { font-size: 14px; font-weight: 700; color: var(--text); }
+.count-pill.alert { color: var(--danger); }
+#h-today { font-size: 20px; }
+#today-count { font-size: 20px; color: var(--danger); }
+#today-count.zero { color: var(--ok); }
 
-/* ---------- badges ---------- */
+/* ---------- badges / tags ---------- */
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
-  padding: 1px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; line-height: 1.6; white-space: nowrap;
-  background: var(--hold-bg); color: var(--hold);
+  font-size: 12px; font-weight: 600; line-height: 1.6; white-space: nowrap; color: var(--hold);
 }
 .badge .g { font-size: 11px; line-height: 1; }
-.st-遅延, .st-ブロック { background: var(--danger-bg); color: var(--danger); }
-.st-要注意 { background: var(--warn-bg); color: var(--warn); }
-.st-順調, .st-完了 { background: var(--ok-bg); color: var(--ok); }
-.st-保留, .st-未着手 { background: var(--hold-bg); color: var(--hold); }
-.st-進行中 { background: var(--accent-bg); color: var(--accent); }
-.st-レビュー待ち { background: #f1ecfb; color: #5b3aa0; }
-.pri { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
+/* 塗りつぶしにするのは「遅延・ブロック」「要注意」だけ。それ以外は文字と記号のみ */
+.st-遅延, .st-ブロック { background: var(--danger); color: #fff; padding: 1px 8px; border-radius: 3px; }
+.st-要注意 { background: var(--warn); color: #fff; padding: 1px 8px; border-radius: 3px; }
+.st-順調, .st-完了 { color: var(--ok); }
+.st-保留, .st-未着手 { color: var(--hold); }
+.st-進行中 { color: var(--accent); }
+.st-レビュー待ち { color: #5b3aa0; }
+
+.pri { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-sub); white-space: nowrap; }
 .pri .bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
 .pri .bars i { width: 3px; border-radius: 1px; background: #c3cad5; }
 .pri .bars i:nth-child(1) { height: 5px; }
 .pri .bars i:nth-child(2) { height: 8px; }
 .pri .bars i:nth-child(3) { height: 12px; }
+.pri-高 { color: var(--text); font-weight: 700; }
 .pri-高 .bars i { background: var(--danger); }
-.pri-中 .bars i:nth-child(-n+2) { background: #c77a0a; }
-.pri-低 .bars i:nth-child(1) { background: #5b6b82; }
-.tag-top { background: var(--accent); color: #fff; }
-.tag-new { background: var(--accent-bg); color: var(--accent); }
+.pri-中 .bars i:nth-child(-n+2) { background: var(--text-sub); }
+.pri-低 .bars i:nth-child(1) { background: var(--text-sub); }
+
+.tag { display: inline-block; padding: 1px 8px; border-radius: 3px; font-size: 12px; font-weight: 700; line-height: 1.6; white-space: nowrap; }
+.tag-over { background: var(--danger); color: #fff; }
+.tag-today { border: 1.5px solid var(--text); color: var(--text); padding: 0 7px; }
+.new-note { font-size: 12px; font-weight: 700; color: var(--accent); }
 
 /* ---------- tasks ---------- */
 .task-list { display: grid; }
 .task {
   display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 12px; align-items: start;
-  padding: 12px 10px; border-top: 1px solid var(--border);
+  padding: 12px 0; border-top: 1px solid var(--border);
 }
 .task:first-child { border-top: 0; }
-.task.urgent { background: #fffafa; box-shadow: inset 3px 0 0 var(--danger); }
-.task.urgent.today { background: #fffcf5; box-shadow: inset 3px 0 0 #c77a0a; }
-.task.is-done .task-title { text-decoration: line-through; color: var(--text-sub); }
-.task-check { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -10px 0 -10px -10px; cursor: pointer; }
+.task.is-done .task-title { text-decoration: line-through; color: var(--text-sub); font-weight: 400; }
+.task-check { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -10px 0 -10px -12px; cursor: pointer; }
 .task-check input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); cursor: pointer; }
 .task-title { font-weight: 600; font-size: 14px; line-height: 1.5; }
-.task-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 4px; font-size: 12px; color: var(--text-sub); }
-.task-due { text-align: right; font-size: 12px; font-weight: 700; white-space: nowrap; color: var(--text-sub); padding-top: 2px; }
-.task-due.overdue { color: var(--danger); }
-.task-due.today { color: var(--warn); }
-.task-due small { display: block; font-weight: 400; color: var(--text-sub); }
+.task-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 4px; font-size: 12px; color: var(--text-sub); }
+.task-due { text-align: right; font-size: 12px; font-weight: 600; white-space: nowrap; color: var(--text-sub); padding-top: 1px; }
+.task-due small { display: block; font-weight: 400; color: var(--text-sub); font-size: 12px; margin-top: 2px; }
 .task-note { color: var(--text-sub); }
 
-.empty {
-  display: flex; gap: 14px; align-items: center; padding: 18px; margin: 4px 0;
-  background: var(--ok-bg); border-radius: var(--radius); color: var(--ok);
-}
+/* 最優先の1件だけ大きくする */
+.task.top { padding: 16px 0; }
+.task.top .task-title { font-size: 18px; font-weight: 700; line-height: 1.45; }
+.task.top .task-meta { margin-top: 6px; font-size: 13px; }
+.top-label { display: block; font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+
+.empty { display: flex; gap: 14px; align-items: center; padding: 20px 0; }
 .empty .tick { width: 36px; height: 36px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; font-size: 18px; flex: none; }
-.empty strong { display: block; font-size: 15px; }
-.empty span { font-size: 13px; color: #2f5d47; }
-.none { padding: 6px 0 10px; color: var(--text-sub); font-size: 13px; }
+.empty strong { display: block; font-size: 16px; color: var(--ok); }
+.empty span { font-size: 13px; color: var(--text-sub); }
+.none { padding: 12px 0; color: var(--text-sub); font-size: 13px; }
 
 /* ---------- attention projects ---------- */
-.attn-list { display: grid; gap: 10px; }
-.attn { border: 1px solid var(--border); border-left-width: 4px; border-radius: 6px; padding: 12px 14px; }
-.attn.st-b-遅延 { border-left-color: var(--danger); }
-.attn.st-b-要注意 { border-left-color: #c77a0a; }
+.attn-list { display: grid; }
+.attn { padding: 14px 0; border-top: 1px solid var(--border); }
+.attn:first-child { border-top: 0; }
 .attn-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
-.attn-top h3 { font-size: 14px; }
-.attn-memo { margin-top: 6px; font-size: 13px; }
+.attn-top h3 { font-size: 15px; }
+.attn-memo { margin-top: 6px; font-size: 14px; }
 .attn-facts { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: 12px; color: var(--text-sub); }
 .attn-facts b { color: var(--text); font-weight: 600; }
 
 /* ---------- projects table ---------- */
-.filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 18px 12px; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 0; }
 .filter-btn {
-  min-height: 36px; padding: 4px 12px; border: 1px solid var(--border); border-radius: 18px;
+  min-height: 36px; padding: 4px 12px; border: 1px solid var(--border); border-radius: 4px;
   background: #fff; cursor: pointer; font-size: 13px;
 }
-.filter-btn:hover { background: var(--bg); }
-.filter-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+.filter-btn:hover { border-color: var(--text-sub); }
+.filter-btn[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: #fff; font-weight: 700; }
 .filter-btn .n { margin-left: 4px; opacity: .85; font-size: 12px; }
 .table-wrap { overflow-x: auto; }
 table.projects { width: 100%; border-collapse: collapse; }
 .projects th {
   text-align: left; font-size: 12px; font-weight: 600; color: var(--text-sub);
-  padding: 8px 12px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: #f8fafc; white-space: nowrap;
+  padding: 8px 12px; border-bottom: 1px solid var(--text-sub); white-space: nowrap;
 }
-.projects th:first-child, .projects td:first-child { padding-left: 18px; }
-.projects th:last-child, .projects td:last-child { padding-right: 18px; }
+.projects th:first-child, .projects td:first-child { padding-left: 0; }
+.projects th:last-child, .projects td:last-child { padding-right: 0; }
 .projects td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .projects tr:last-child td { border-bottom: 0; }
 .p-name { font-weight: 600; }
 .p-memo { margin-top: 2px; font-size: 12px; color: var(--text-sub); font-weight: 400; }
 .progress { display: flex; align-items: center; gap: 8px; min-width: 130px; }
-.bar { flex: 1; height: 8px; background: #e6eaf0; border-radius: 4px; overflow: hidden; }
-.bar > span { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.bar { flex: 1; height: 8px; background: #d3d8df; border-radius: 2px; overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--accent); }
 .bar.s-遅延 > span { background: var(--danger); }
-.bar.s-要注意 > span { background: #c77a0a; }
-.bar.s-順調 > span { background: var(--accent); }
-.bar.s-保留 > span { background: #8a96a8; }
+.bar.s-要注意 > span { background: var(--warn); }
+.bar.s-保留 > span { background: #5b6b82; }
 .bar.s-完了 > span { background: var(--ok); }
 .progress .pct { font-size: 13px; font-weight: 700; min-width: 38px; text-align: right; }
 .progress-sub { font-size: 11px; color: var(--text-sub); }
 .nowrap { white-space: nowrap; }
 
 /* ---------- activity ---------- */
-.act-group h3 { font-size: 12px; font-weight: 700; color: var(--text-sub); padding: 10px 0 4px; display: flex; gap: 8px; align-items: center; }
+.act-group h3 { font-size: 12px; font-weight: 700; color: var(--text-sub); padding: 12px 0 2px; display: flex; gap: 8px; align-items: baseline; }
 .act-item { padding: 8px 0; border-top: 1px solid var(--border); }
 .act-item:first-of-type { border-top: 0; }
 .act-meta { font-size: 12px; color: var(--text-sub); display: flex; flex-wrap: wrap; gap: 0 8px; }
@@ -232,7 +223,7 @@ table.projects { width: 100%; border-collapse: collapse; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 1180px) {
-  .layout { grid-template-columns: minmax(0, 1fr); }
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 36px; }
 }
 @media (max-width: 900px) {
   .shell { display: block; }
@@ -250,19 +241,18 @@ table.projects { width: 100%; border-collapse: collapse; }
   .today-date .short { display: inline; }
   .topbar-right { gap: 10px; }
   .user-name small { display: none; }
-  .content { padding: 16px 12px 40px; }
-  .page-head { margin-bottom: 12px; }
+  .content { padding: 16px 16px 40px; }
+  .page-head { margin-bottom: 16px; }
   .page-head h1 { font-size: 19px; }
-  .col { gap: 16px; }
-  .layout { gap: 16px; }
-  .panel-head { padding: 12px 14px 8px; }
-  .panel-body { padding: 0 14px 12px; }
-  .filters { padding: 0 14px 12px; }
+  .col { gap: 28px; }
+  .layout { gap: 28px; }
+  #h-today, #today-count { font-size: 18px; }
+  .task.top .task-title { font-size: 16px; }
 
   .table-wrap { overflow: visible; }
   .projects thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
   .projects, .projects tbody { display: block; }
-  .projects tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; padding: 12px 14px; border-top: 1px solid var(--border); }
+  .projects tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; padding: 12px 0; border-top: 1px solid var(--border); }
   .projects tr:first-child { border-top: 0; }
   .projects td { display: block; padding: 0 !important; border: 0; }
   .projects td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; color: var(--text-sub); }
@@ -480,8 +470,8 @@ table.projects { width: 100%; border-collapse: collapse; }
   function dueHtml(t) {
     var d = diffDays(t.due);
     if (t.done) return '<div class="task-due">' + fmtDate(t.due) + '</div>';
-    if (d < 0) return '<div class="task-due overdue">期限切れ<small>' + fmtDate(t.due) + '(' + (-d) + '日超過)</small></div>';
-    if (d === 0) return '<div class="task-due today">今日が期限<small>' + fmtDate(t.due) + '</small></div>';
+    if (d < 0) return '<div class="task-due"><span class="tag tag-over">期限切れ</span><small>' + fmtDate(t.due) + '・' + (-d) + '日超過</small></div>';
+    if (d === 0) return '<div class="task-due"><span class="tag tag-today">今日が期限</span><small>' + fmtDate(t.due) + '</small></div>';
     return '<div class="task-due">' + fmtDate(t.due) + '<small>あと' + d + '日</small></div>';
   }
 
@@ -490,11 +480,7 @@ table.projects { width: 100%; border-collapse: collapse; }
     var d = diffDays(t.due);
     var cls = 'task';
     if (t.done) cls += ' is-done';
-    if (opts.urgent) {
-      cls += ' urgent';
-      if (d === 0 && t.base !== 'ブロック') cls += ' today';
-      else if (d >= 0 && t.base === 'ブロック') cls += '';
-    }
+    if (opts.top) cls += ' top';
     var pn = projectName(t.project);
     var note = t.done ? (t.doneNote || '') : t.note;
     var meta = '';
@@ -502,7 +488,7 @@ table.projects { width: 100%; border-collapse: collapse; }
     meta += priBadge(t.priority);
     meta += statusBadge(taskStatus(t));
     if (note) meta += '<span class="task-note">' + esc(note) + '</span>';
-    var top = opts.top ? '<span class="badge tag-top" style="margin-right:6px">最優先</span>' : '';
+    var top = opts.top ? '<span class="top-label">最優先</span>' : '';
     return '<li class="' + cls + '" data-id="' + t.id + '">' +
       '<label class="task-check"><input type="checkbox" data-id="' + t.id + '"' + (t.done ? ' checked' : '') +
       ' aria-label="' + esc(t.title) + 'を完了にする"></label>' +
@@ -529,6 +515,7 @@ table.projects { width: 100%; border-collapse: collapse; }
       }).join('') + '</ul>';
     }
     $('today-count').textContent = today.length + '件';
+    $('today-count').classList.toggle('zero', today.length === 0);
 
     $('up-body').innerHTML = up.length
       ? '<ul class="task-list">' + up.map(function (t) { return taskHtml(t); }).join('') + '</ul>'
@@ -602,7 +589,7 @@ table.projects { width: 100%; border-collapse: collapse; }
         if (last !== null) html += '</div>';
         var n = ACTIVITIES.filter(function (x) { return x.date === a.date; }).length;
         html += '<div class="act-group"><h3>' + ACT_LABEL[a.date] +
-          (a.date === '10/15' ? '<span class="badge tag-new">新着 ' + n + '件</span>' : '') + '</h3>';
+          (a.date === '10/15' ? '<span class="new-note">新着 ' + n + '件</span>' : '') + '</h3>';
         last = a.date;
       }
       var pn = projectName(a.project);
