@@ -69,7 +69,6 @@
 experiments/<実験ID>/
 ├── requirements.md      # 画面要件(Baseline にも渡せる)
 ├── comparison.md
-├── experiment-log.md    # 実験するときだけ。実験設計(評価者用)もここに書く
 └── rules/
     ├── variant-a.html   # A. Practical
     ├── variant-b.html   # B. Balanced
@@ -77,6 +76,8 @@ experiments/<実験ID>/
 ```
 
 既存のプロジェクトの中で使う場合も、既存ファイルには触れず、この形の専用ディレクトリに置く。
+
+実験の記録(`experiment-logs/<実験ID>.md`)は評価者用。**案を作る・直す作業の中では読まない。**
 
 ## Step 5：ブラウザで検証する
 

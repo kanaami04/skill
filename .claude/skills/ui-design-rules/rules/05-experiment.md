@@ -16,7 +16,8 @@
 
 結果の差がルール由来かどうかを見るため、以下をそろえる。
 
-- **画面要件は `requirements.md` として独立させ、Baseline にはそのファイルだけを渡す。** 評価基準や比較方法は `experiment-log.md` の「実験設計」に書き、Baseline には渡さない(同じファイルに書くと、Baseline も読んでしまう)。
+- **画面要件は `requirements.md` として独立させ、Baseline にはそのファイルだけを渡す。** 評価基準や比較方法は実験ログの「実験設計」に書き、Baseline には渡さない(同じファイルに書くと、Baseline も読んでしまう)。
+- **実験ログは、実験フォルダの外(`experiment-logs/<実験ID>.md`)に置く。** 実験フォルダの中に置くと、フォルダを調べた流れで両条件とも読んでしまう(order-list-001 で発生)。
 - Baseline と Rules は、それぞれ**新しいセッション**で実行する。
 - 使うモデル、ビューポートを同じにする。
 - 自動で動くデザイン系のプラグイン(例: `frontend-design`)は、両条件とも無効にする。
@@ -27,7 +28,7 @@
 
 ## 記録する項目
 
-`templates/experiment-log.md` に記録する。
+`templates/experiment-log.md` をコピーした `experiment-logs/<実験ID>.md` に記録する。
 
 - 初回生成にかかった時間
 - 修正ごとの時間と内容

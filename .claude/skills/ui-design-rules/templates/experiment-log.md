@@ -1,9 +1,9 @@
 # 実験ログ
 
-> `experiments/<実験ID>/experiment-log.md` として作成する。方法は `rules/05-experiment.md` を参照。
+> `experiment-logs/<実験ID>.md` として作成する(実験フォルダの外)。方法は `rules/05-experiment.md` を参照。
 > **このファイルは評価者用。Baseline には渡さない。** 実験中は IDE で開いたままにしない。
 > 記号: ○ 問題なし / △ 改善点あり・迷った / × 問題あり・答えられない / − 未確認
-> 前回の実験の記入例: `experiments/dashboard-001/experiment-log.md`
+> 記入例: `experiments/order-list-001/experiment-log.md`(このころは実験フォルダの中に置いていた)
 
 ## 0. 実験設計(生成前に確定する)
 

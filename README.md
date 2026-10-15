@@ -27,6 +27,8 @@ Skill・Markdown・テンプレートだけで動き、外部のAI APIには依�
 │       └── experiment-log.md       # 実験設計と実験ログ(評価者用)
 ├── experiments/                    # 実験ごとの成果物
 │   └── dashboard-001/              # 最初の実験(ルール v1。Baseline が勝った)
+├── experiment-logs/                # 実験ログ(評価者用。実験フォルダの外に置く)
+├── tools/verify/                   # 画面案の検証ツール(Playwright)
 └── research/                       # ルール改訂の根拠にした調査メモ
 ```
 
@@ -43,13 +45,13 @@ Skill・Markdown・テンプレートだけで動き、外部のAI APIには依�
 
 ## 実験の手順
 
-詳しくは [rules/05-experiment.md](.claude/skills/ui-design-rules/rules/05-experiment.md)。記入例は [experiments/dashboard-001/experiment-log.md](experiments/dashboard-001/experiment-log.md)。
+詳しくは [rules/05-experiment.md](.claude/skills/ui-design-rules/rules/05-experiment.md)。記入例は [experiments/order-list-001/experiment-log.md](experiments/order-list-001/experiment-log.md)。
 
 1. **画面を1つ決め、画面要件と実験ログを用意する。**
    ```sh
    mkdir -p experiments/<実験ID>/screenshots
    cp .claude/skills/ui-design-rules/templates/requirements.md experiments/<実験ID>/requirements.md
-   cp .claude/skills/ui-design-rules/templates/experiment-log.md experiments/<実験ID>/experiment-log.md
+   cp .claude/skills/ui-design-rules/templates/experiment-log.md experiment-logs/<実験ID>.md
    ```
    画面要件を埋め、実験ログの「0. 実験設計」を生成前に確定する。
 2. **IDE で、実験ログ・調査メモ・ルールのファイルを閉じる。** 開いているファイルの情報は、両方のセッションに伝わる。
