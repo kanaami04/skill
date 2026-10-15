@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ai-known</title>
+<style>
+  body { margin: 0; font: 14px sans-serif; background: #f3f4f6; padding: 16px; }
+  .box { background: #fff; border: 1px solid #ccc; padding: 12px; margin-bottom: 12px; width: 600px; }
+  .row { padding: 8px; margin: 4px 0; }
+
+  /* 左線: 数える(合計5) */
+  .ll-a { border-left: 4px solid #b3261e; }                    /* 1 */
+  .ll-b { border-left: 4px solid #b3261e; }                    /* 2 */
+  .ll-c { border-left: 4px solid #1f3b73; }                    /* 3 */
+  .ll-shadow { box-shadow: inset 3px 0 0 #1f3b73; }            /* 4 */
+  .ll-pseudo { position: relative; }
+  .ll-pseudo::before { content: ""; position: absolute; left: 0; top: 0; width: 3px; height: 24px; background: #0b6b64; } /* 5 */
+
+  /* 数えない */
+  .ctl-box { border: 1px solid #999; }                         /* 4辺同じ太さ */
+  .ctl-under { border-bottom: 1px solid #ccc; }                /* 下線 */
+  .ctl-shadow { box-shadow: 0 1px 3px rgba(0,0,0,.2); }        /* 汎用の影 */
+  .ctl-dot { position: relative; }
+  .ctl-dot::before { content: ""; position: absolute; left: 0; top: 4px; width: 9px; height: 9px; background: #c00; } /* 四角(帯ではない) */
+  .ctl-hidden { display: none; border-left: 4px solid red; }
+  .ctl-off { position: absolute; left: -9999px; border-left: 4px solid red; }
+
+  /* バッジ */
+  .chip { display: inline-block; padding: 2px 8px; border-radius: 10px; }
+  .b1 { background: #fde8e8; } .b2 { background: #fde8e8; } .b3 { background: #e8f0fe; } .b4 { background: #fff4d6; }
+  .bar { display: inline-block; width: 60px; height: 8px; background: #2e7d32; }  /* 文字なし */
+  .btn { background: #e8f0fe; border: 0; padding: 4px 8px; }
+  .btn small { background: #ddd; padding: 0 4px; }
+
+  /* 入れ子 */
+  .inner-frame { border: 1px solid #ccc; width: 300px; height: 60px; }
+  .inner-chip { border: 1px solid #ccc; display: inline-block; padding: 0 6px; }
+</style></head>
+<body>
+  <div class="row ll-a">左線A</div>
+  <div class="row ll-b">左線B</div>
+  <div class="row ll-c">左線C</div>
+  <div class="row ll-shadow">内側の影</div>
+  <div class="row ll-pseudo">疑似要素の帯</div>
+
+  <div class="row ctl-box">4辺の枠</div>
+  <div class="row ctl-under">下線</div>
+  <div class="row ctl-shadow">汎用の影</div>
+  <div class="row ctl-dot">四角の点</div>
+  <div class="row ctl-hidden">隠れている</div>
+  <div class="row ctl-off">画面の外</div>
+
+  <p>
+    <span class="chip b1">期限切れ</span> <span class="chip b2">ブロック</span>
+    <span class="chip b3">レビュー</span> <span class="chip b4">今日</span>
+    <span class="bar"></span> <button class="btn">操作 <small>3</small></button>
+  </p>
+
+  <!-- 入れ子: 枠の中の枠 = 1 -->
+  <div class="box"><div class="inner-frame">入れ子の枠</div></div>
+  <!-- 入れ子ではない: 囲みの中の下線の行、小さい枠のチップ -->
+  <div class="box"><div class="row ctl-under">下線だけの行</div><span class="inner-chip">チップ</span></div>
+</body></html>

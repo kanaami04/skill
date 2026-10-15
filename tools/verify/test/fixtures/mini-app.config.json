@@ -1,0 +1,17 @@
+{
+  "functional": [
+    { "id": "toggle", "type": "taskToggle", "task": "タスクA" },
+    { "id": "empty", "type": "emptyState", "tasks": ["タスクA", "タスクB"], "expectText": "今日の対応はすべて完了" },
+    {
+      "id": "filter", "type": "projectFilter", "scope": "[aria-labelledby=\"h-proj\"]",
+      "projects": { "P1": "会員アプリ", "P2": "請求書自動化", "P3": "ヘルプ移行", "P4": "データ基盤" },
+      "filters": [
+        { "label": "すべて", "expect": ["P1", "P2", "P3", "P4"] },
+        { "label": "要対応", "expect": ["P1", "P3"] },
+        { "label": "順調", "expect": ["P2"] },
+        { "label": "保留", "expect": ["P4"] }
+      ]
+    },
+    { "id": "nav", "type": "navToggle", "viewports": ["mobile"] }
+  ]
+}

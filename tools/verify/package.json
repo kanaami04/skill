@@ -1,0 +1,16 @@
+{
+  "name": "ui-verify",
+  "version": "0.1.0",
+  "private": true,
+  "description": "画面案(単体HTML)をブラウザで検証するツール。スクリーンショット、レイアウト、AI典型の数え上げ、機能要件の確認",
+  "type": "module",
+  "bin": { "ui-verify": "./verify.mjs" },
+  "scripts": {
+    "verify": "node verify.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "playwright-core": "1.64.1"
+  }
+}

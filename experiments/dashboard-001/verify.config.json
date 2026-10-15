@@ -1,0 +1,49 @@
+{
+  "functional": [
+    {
+      "id": "タスク切替",
+      "type": "taskToggle",
+      "task": "ヘルプ記事の移行範囲を確定する"
+    },
+    {
+      "id": "空の状態",
+      "type": "emptyState",
+      "tasks": [
+        "ヘルプ記事の移行範囲を確定する",
+        "ログイン画面デザインのレビュー",
+        "決済APIの仕様差分を確認する",
+        "移行スケジュールの再調整をクライアントに連絡",
+        "請求書テンプレートの最終承認"
+      ],
+      "expectText": "今日の対応はすべて完了",
+      "screenshot": "empty"
+    },
+    {
+      "id": "絞り込み",
+      "type": "projectFilter",
+      "scope": "[aria-labelledby=\"h-proj\"]",
+      "projects": {
+        "P1": "会員アプリ v2 リニューアル",
+        "P2": "請求書発行の自動化",
+        "P3": "ヘルプセンター移行",
+        "P4": "年末キャンペーンLP",
+        "P5": "データ基盤の移行",
+        "P6": "年次セキュリティ監査対応"
+      },
+      "initial": "すべて",
+      "filters": [
+        { "label": "すべて", "expect": ["P1", "P2", "P3", "P4", "P5", "P6"] },
+        { "label": "要対応(遅延・要注意)", "expect": ["P1", "P3"] },
+        { "label": "順調", "expect": ["P2", "P4"] },
+        { "label": "保留", "expect": ["P5"] },
+        { "label": "完了", "expect": ["P6"] }
+      ]
+    },
+    {
+      "id": "ナビ開閉",
+      "type": "navToggle",
+      "viewports": ["mobile"],
+      "screenshot": "nav"
+    }
+  ]
+}
