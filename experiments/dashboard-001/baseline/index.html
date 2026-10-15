@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ダッシュボード | Northstar</title>
+<style>
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --border: #e2e6ec;
+  --text: #1c2430;
+  --text-sub: #4b5565;
+  --accent: #2a4fb8;
+  --accent-bg: #eaf0fd;
+  --side-bg: #14213d;
+  --side-text: #c9d3e6;
+  --danger: #b42318;
+  --danger-bg: #fdecea;
+  --warn: #8a3b0a;
+  --warn-bg: #fff4e0;
+  --ok: #05603a;
+  --ok-bg: #e6f6ee;
+  --hold: #475467;
+  --hold-bg: #eceff3;
+  --radius: 8px;
+  --font: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+}
+h1, h2, h3, p, ul, ol { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: absolute; left: 8px; top: -48px; z-index: 100;
+  background: #fff; padding: 8px 12px; border-radius: 6px; border: 2px solid var(--accent);
+}
+.skip-link:focus { top: 8px; }
+
+/* ---------- shell ---------- */
+.shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+.sidebar {
+  background: var(--side-bg);
+  color: var(--side-text);
+  padding: 20px 12px;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.brand { display: flex; align-items: center; gap: 10px; padding: 4px 10px 20px; color: #fff; font-weight: 700; font-size: 18px; letter-spacing: .02em; }
+.brand-mark { color: #8fb0ff; font-size: 20px; line-height: 1; }
+.nav-list { display: grid; gap: 2px; }
+.nav-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 10px; border-radius: 6px;
+  color: var(--side-text); text-decoration: none; font-size: 14px;
+}
+.nav-link svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.nav-link:hover { background: rgba(255,255,255,.08); color: #fff; }
+.nav-link[aria-current="page"] { background: rgba(143,176,255,.2); color: #fff; font-weight: 700; }
+.nav-link .nav-count {
+  margin-left: auto; min-width: 22px; text-align: center;
+  background: rgba(255,255,255,.14); color: #fff; border-radius: 10px; padding: 0 7px; font-size: 12px;
+}
+.sidebar :focus-visible { outline-color: #fff; }
+
+.main { min-width: 0; }
+.topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 32px; background: var(--surface); border-bottom: 1px solid var(--border);
+  min-height: 56px;
+}
+.menu-btn {
+  display: none; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 8px; background: #fff; cursor: pointer;
+}
+.menu-btn svg { width: 22px; height: 22px; stroke: var(--text); fill: none; stroke-width: 2; stroke-linecap: round; }
+.topbar-brand { display: none; font-weight: 700; font-size: 16px; }
+.topbar-brand span { color: var(--accent); }
+.workspace { color: var(--text-sub); font-size: 13px; }
+.workspace strong { color: var(--text); font-size: 14px; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+.today-date { font-size: 13px; color: var(--text-sub); white-space: nowrap; }
+.today-date .short { display: none; }
+.user { display: flex; align-items: center; gap: 10px; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff;
+  display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none;
+}
+.user-name { font-size: 13px; line-height: 1.3; white-space: nowrap; }
+.user-name small { display: block; color: var(--text-sub); font-size: 11px; }
+
+.content { padding: 24px 32px 48px; max-width: 1280px; }
+.page-head { margin-bottom: 20px; }
+.page-head h1 { font-size: 22px; line-height: 1.3; }
+.summary { margin-top: 4px; color: var(--text-sub); font-size: 14px; }
+.summary b { color: var(--text); font-size: 15px; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+.col { display: grid; gap: 24px; min-width: 0; }
+
+/* ---------- panels ---------- */
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.panel-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 18px 10px; }
+.panel-head h2 { font-size: 16px; line-height: 1.4; }
+.panel-head .sub { color: var(--text-sub); font-size: 12px; }
+.count-pill {
+  display: inline-block; min-width: 26px; text-align: center; padding: 0 9px; border-radius: 12px;
+  background: var(--hold-bg); color: var(--text); font-size: 12px; font-weight: 700;
+}
+.count-pill.alert { background: var(--danger-bg); color: var(--danger); }
+.panel-body { padding: 0 18px 14px; }
+.panel.priority { border-color: #c8d3ee; box-shadow: inset 4px 0 0 var(--accent); }
+
+/* ---------- badges ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 1px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; line-height: 1.6; white-space: nowrap;
+  background: var(--hold-bg); color: var(--hold);
+}
+.badge .g { font-size: 11px; line-height: 1; }
+.st-遅延, .st-ブロック { background: var(--danger-bg); color: var(--danger); }
+.st-要注意 { background: var(--warn-bg); color: var(--warn); }
+.st-順調, .st-完了 { background: var(--ok-bg); color: var(--ok); }
+.st-保留, .st-未着手 { background: var(--hold-bg); color: var(--hold); }
+.st-進行中 { background: var(--accent-bg); color: var(--accent); }
+.st-レビュー待ち { background: #f1ecfb; color: #5b3aa0; }
+.pri { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.pri .bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+.pri .bars i { width: 3px; border-radius: 1px; background: #c3cad5; }
+.pri .bars i:nth-child(1) { height: 5px; }
+.pri .bars i:nth-child(2) { height: 8px; }
+.pri .bars i:nth-child(3) { height: 12px; }
+.pri-高 .bars i { background: var(--danger); }
+.pri-中 .bars i:nth-child(-n+2) { background: #c77a0a; }
+.pri-低 .bars i:nth-child(1) { background: #5b6b82; }
+.tag-top { background: var(--accent); color: #fff; }
+.tag-new { background: var(--accent-bg); color: var(--accent); }
+
+/* ---------- tasks ---------- */
+.task-list { display: grid; }
+.task {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 12px; align-items: start;
+  padding: 12px 10px; border-top: 1px solid var(--border);
+}
+.task:first-child { border-top: 0; }
+.task.urgent { background: #fffafa; box-shadow: inset 3px 0 0 var(--danger); }
+.task.urgent.today { background: #fffcf5; box-shadow: inset 3px 0 0 #c77a0a; }
+.task.is-done .task-title { text-decoration: line-through; color: var(--text-sub); }
+.task-check { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -10px 0 -10px -10px; cursor: pointer; }
+.task-check input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.task-title { font-weight: 600; font-size: 14px; line-height: 1.5; }
+.task-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 4px; font-size: 12px; color: var(--text-sub); }
+.task-due { text-align: right; font-size: 12px; font-weight: 700; white-space: nowrap; color: var(--text-sub); padding-top: 2px; }
+.task-due.overdue { color: var(--danger); }
+.task-due.today { color: var(--warn); }
+.task-due small { display: block; font-weight: 400; color: var(--text-sub); }
+.task-note { color: var(--text-sub); }
+
+.empty {
+  display: flex; gap: 14px; align-items: center; padding: 18px; margin: 4px 0;
+  background: var(--ok-bg); border-radius: var(--radius); color: var(--ok);
+}
+.empty .tick { width: 36px; height: 36px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; font-size: 18px; flex: none; }
+.empty strong { display: block; font-size: 15px; }
+.empty span { font-size: 13px; color: #2f5d47; }
+.none { padding: 6px 0 10px; color: var(--text-sub); font-size: 13px; }
+
+/* ---------- attention projects ---------- */
+.attn-list { display: grid; gap: 10px; }
+.attn { border: 1px solid var(--border); border-left-width: 4px; border-radius: 6px; padding: 12px 14px; }
+.attn.st-b-遅延 { border-left-color: var(--danger); }
+.attn.st-b-要注意 { border-left-color: #c77a0a; }
+.attn-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.attn-top h3 { font-size: 14px; }
+.attn-memo { margin-top: 6px; font-size: 13px; }
+.attn-facts { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: 12px; color: var(--text-sub); }
+.attn-facts b { color: var(--text); font-weight: 600; }
+
+/* ---------- projects table ---------- */
+.filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 18px 12px; }
+.filter-btn {
+  min-height: 36px; padding: 4px 12px; border: 1px solid var(--border); border-radius: 18px;
+  background: #fff; cursor: pointer; font-size: 13px;
+}
+.filter-btn:hover { background: var(--bg); }
+.filter-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+.filter-btn .n { margin-left: 4px; opacity: .85; font-size: 12px; }
+.table-wrap { overflow-x: auto; }
+table.projects { width: 100%; border-collapse: collapse; }
+.projects th {
+  text-align: left; font-size: 12px; font-weight: 600; color: var(--text-sub);
+  padding: 8px 12px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: #f8fafc; white-space: nowrap;
+}
+.projects th:first-child, .projects td:first-child { padding-left: 18px; }
+.projects th:last-child, .projects td:last-child { padding-right: 18px; }
+.projects td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.projects tr:last-child td { border-bottom: 0; }
+.p-name { font-weight: 600; }
+.p-memo { margin-top: 2px; font-size: 12px; color: var(--text-sub); font-weight: 400; }
+.progress { display: flex; align-items: center; gap: 8px; min-width: 130px; }
+.bar { flex: 1; height: 8px; background: #e6eaf0; border-radius: 4px; overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.bar.s-遅延 > span { background: var(--danger); }
+.bar.s-要注意 > span { background: #c77a0a; }
+.bar.s-順調 > span { background: var(--accent); }
+.bar.s-保留 > span { background: #8a96a8; }
+.bar.s-完了 > span { background: var(--ok); }
+.progress .pct { font-size: 13px; font-weight: 700; min-width: 38px; text-align: right; }
+.progress-sub { font-size: 11px; color: var(--text-sub); }
+.nowrap { white-space: nowrap; }
+
+/* ---------- activity ---------- */
+.act-group h3 { font-size: 12px; font-weight: 700; color: var(--text-sub); padding: 10px 0 4px; display: flex; gap: 8px; align-items: center; }
+.act-item { padding: 8px 0; border-top: 1px solid var(--border); }
+.act-item:first-of-type { border-top: 0; }
+.act-meta { font-size: 12px; color: var(--text-sub); display: flex; flex-wrap: wrap; gap: 0 8px; }
+.act-meta b { color: var(--text); font-weight: 600; }
+.act-body { font-size: 13px; margin-top: 1px; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1180px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .shell { display: block; }
+  .sidebar {
+    display: none; position: fixed; z-index: 50; left: 0; right: 0; top: 56px; height: auto; max-height: calc(100vh - 56px);
+    box-shadow: 0 12px 24px rgba(0,0,0,.25);
+  }
+  .sidebar.open { display: block; }
+  .sidebar .brand { display: none; }
+  .topbar { padding: 6px 12px; position: sticky; top: 0; z-index: 60; gap: 10px; }
+  .menu-btn { display: inline-flex; }
+  .topbar-brand { display: block; }
+  .workspace { display: none; }
+  .today-date .full { display: none; }
+  .today-date .short { display: inline; }
+  .topbar-right { gap: 10px; }
+  .user-name small { display: none; }
+  .content { padding: 16px 12px 40px; }
+  .page-head { margin-bottom: 12px; }
+  .page-head h1 { font-size: 19px; }
+  .col { gap: 16px; }
+  .layout { gap: 16px; }
+  .panel-head { padding: 12px 14px 8px; }
+  .panel-body { padding: 0 14px 12px; }
+  .filters { padding: 0 14px 12px; }
+
+  .table-wrap { overflow: visible; }
+  .projects thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+  .projects, .projects tbody { display: block; }
+  .projects tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; padding: 12px 14px; border-top: 1px solid var(--border); }
+  .projects tr:first-child { border-top: 0; }
+  .projects td { display: block; padding: 0 !important; border: 0; }
+  .projects td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; color: var(--text-sub); }
+  .projects td.c-name { grid-column: 1 / -1; }
+  .projects td.c-prog { grid-column: 1 / -1; }
+}
+@media (max-width: 420px) {
+  .task { grid-template-columns: auto minmax(0, 1fr); }
+  .task-due { grid-column: 2; text-align: left; padding-top: 0; }
+  .task-due small { display: inline; margin-left: 6px; }
+  .user-name { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">本文へ移動</a>
+<div class="shell">
+  <nav class="sidebar" id="sidebar" aria-label="メインナビゲーション">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">✦</span>Northstar</div>
+    <ul class="nav-list">
+      <li><a class="nav-link" href="./index.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>ダッシュボード</a></li>
+      <li><a class="nav-link" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>プロジェクト</a></li>
+      <li><a class="nav-link" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8 12 3 3 5-6"/></svg>マイタスク<span class="nav-count" id="nav-task-count" aria-label="未完了の件数"></span></a></li>
+      <li><a class="nav-link" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>カレンダー</a></li>
+      <li><a class="nav-link" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17.5 14c2.5.3 4 2.2 4 5"/></svg>チーム</a></li>
+      <li><a class="nav-link" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V4M4 20h16M8 16v-5M13 16V8M18 16v-8"/></svg>レポート</a></li>
+      <li><a class="nav-link" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>設定</a></li>
+    </ul>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <button type="button" class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="sidebar" aria-label="メニューを開く">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="topbar-brand"><span aria-hidden="true">✦</span> Northstar</div>
+      <div class="workspace"><strong>Northstar</strong> / プロダクト開発チーム</div>
+      <div class="topbar-right">
+        <div class="today-date"><span class="full">2026年10月15日(木)</span><span class="short">10/15(木)</span></div>
+        <div class="user">
+          <div class="avatar" aria-hidden="true">佐</div>
+          <div class="user-name">佐藤 遥<small>チームリーダー</small></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content" id="main-content">
+      <div class="page-head">
+        <h1>ダッシュボード</h1>
+        <p class="summary" id="summary" aria-live="polite"></p>
+      </div>
+
+      <div class="layout">
+        <div class="col">
+          <section class="panel priority" aria-labelledby="h-today">
+            <div class="panel-head">
+              <h2 id="h-today">今日対応するタスク</h2>
+              <span class="count-pill" id="today-count"></span>
+              <span class="sub">期限切れ・今日期限・ブロック中</span>
+            </div>
+            <div class="panel-body" id="today-body"></div>
+          </section>
+
+          <section class="panel" aria-labelledby="h-attn">
+            <div class="panel-head">
+              <h2 id="h-attn">注意が必要なプロジェクト</h2>
+              <span class="count-pill alert" id="attn-count"></span>
+              <span class="sub">遅延・要注意</span>
+            </div>
+            <div class="panel-body"><div class="attn-list" id="attn-list"></div></div>
+          </section>
+
+          <section class="panel" aria-labelledby="h-proj">
+            <div class="panel-head">
+              <h2 id="h-proj">プロジェクトの進捗と状態</h2>
+              <span class="sub" id="proj-shown"></span>
+            </div>
+            <div class="filters" role="group" aria-label="状態で絞り込む" id="filters"></div>
+            <div class="table-wrap">
+              <table class="projects">
+                <thead>
+                  <tr><th scope="col">プロジェクト</th><th scope="col">状態</th><th scope="col">進捗</th><th scope="col">期限</th><th scope="col">担当</th></tr>
+                </thead>
+                <tbody id="proj-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="col">
+          <section class="panel" aria-labelledby="h-up">
+            <div class="panel-head">
+              <h2 id="h-up">今後7日以内のタスク</h2>
+              <span class="count-pill" id="up-count"></span>
+              <span class="sub">10/16〜10/22</span>
+            </div>
+            <div class="panel-body" id="up-body"></div>
+          </section>
+
+          <section class="panel" aria-labelledby="h-done">
+            <div class="panel-head">
+              <h2 id="h-done">完了したタスク</h2>
+              <span class="count-pill" id="done-count"></span>
+            </div>
+            <div class="panel-body" id="done-body"></div>
+          </section>
+
+          <section class="panel" aria-labelledby="h-act">
+            <div class="panel-head"><h2 id="h-act">最近のアクティビティ</h2></div>
+            <div class="panel-body" id="act-body"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div class="sr-only" role="status" aria-live="polite" id="announce"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var TODAY = '2026-10-15';
+  var WEEK = ['日', '月', '火', '水', '木', '金', '土'];
+
+  var PROJECTS = [
+    { id: 'P1', name: '会員アプリ v2 リニューアル', status: '要注意', done: 34, total: 55, due: '2026-10-31', owner: '田中 美咲', memo: '決済APIの仕様差分が未解決。ベンダーの回答待ち' },
+    { id: 'P2', name: '請求書発行の自動化', status: '順調', done: 26, total: 32, due: '2026-11-14', owner: '鈴木 健', memo: '' },
+    { id: 'P3', name: 'ヘルプセンター移行', status: '遅延', done: 9, total: 24, due: '2026-10-20', owner: '高橋 涼', memo: '移行対象の記事数が想定の1.5倍。期限の再調整が必要' },
+    { id: 'P4', name: '年末キャンペーンLP', status: '順調', done: 9, total: 20, due: '2026-11-28', owner: '伊藤 さくら', memo: '' },
+    { id: 'P5', name: 'データ基盤の移行', status: '保留', done: 4, total: 20, due: null, owner: '佐藤 遥', memo: '予算確定待ちのため10/13から保留' },
+    { id: 'P6', name: '年次セキュリティ監査対応', status: '完了', done: 18, total: 18, due: '2026-10-09', owner: '佐藤 遥', memo: '' }
+  ];
+
+  var TASKS = [
+    { id: 'T-101', title: 'ヘルプ記事の移行範囲を確定する', project: 'P3', priority: '高', status: '進行中', due: '2026-10-13', note: '' },
+    { id: 'T-102', title: 'ログイン画面デザインのレビュー', project: 'P1', priority: '高', status: 'レビュー待ち', due: '2026-10-14', note: '田中 美咲から依頼' },
+    { id: 'T-103', title: '決済APIの仕様差分を確認する', project: 'P1', priority: '高', status: 'ブロック', due: '2026-10-15', note: 'ベンダーの回答待ち' },
+    { id: 'T-104', title: '移行スケジュールの再調整をクライアントに連絡', project: 'P3', priority: '高', status: '未着手', due: '2026-10-15', note: '' },
+    { id: 'T-105', title: '請求書テンプレートの最終承認', project: 'P2', priority: '中', status: 'レビュー待ち', due: '2026-10-15', note: '鈴木 健から依頼' },
+    { id: 'T-106', title: 'LPのコピー案にフィードバックする', project: 'P4', priority: '中', status: '未着手', due: '2026-10-16', note: '' },
+    { id: 'T-107', title: '週次定例のアジェンダを作成する', project: null, priority: '低', status: '未着手', due: '2026-10-16', note: 'チーム運営' },
+    { id: 'T-108', title: 'データ基盤移行の再開可否を判断する', project: 'P5', priority: '中', status: '未着手', due: '2026-10-17', note: '' },
+    { id: 'T-109', title: 'QA環境の負荷試験結果を確認する', project: 'P1', priority: '中', status: '未着手', due: '2026-10-19', note: '' },
+    { id: 'T-110', title: '新メンバーのアカウント権限を設定する', project: null, priority: '低', status: '完了', due: '2026-10-15', note: '', doneNote: '今日 09:05 に完了' }
+  ];
+
+  var ACTIVITIES = [
+    { date: '10/15', time: '10:12', who: '鈴木 健', text: '「請求書テンプレートの最終承認」のレビューを依頼', project: 'P2' },
+    { date: '10/15', time: '09:30', who: '田中 美咲', text: '「決済APIの仕様差分を確認する」をブロックに変更(ベンダーの回答待ち)', project: 'P1' },
+    { date: '10/15', time: '09:05', who: '佐藤 遥', text: '「新メンバーのアカウント権限を設定する」を完了', project: null },
+    { date: '10/14', time: '18:20', who: '高橋 涼', text: 'コメント:「記事数が想定の1.5倍あり、10/20は厳しいです」', project: 'P3' },
+    { date: '10/14', time: '16:45', who: '田中 美咲', text: '「ログイン画面デザインのレビュー」のレビューを依頼', project: 'P1' },
+    { date: '10/14', time: '11:00', who: '伊藤 さくら', text: '「コピー案 v2」を添付', project: 'P4' },
+    { date: '10/13', time: '17:30', who: '鈴木 健', text: '「CSV出力」を完了', project: 'P2' },
+    { date: '10/13', time: '10:15', who: '佐藤 遥', text: 'プロジェクトを保留に変更(予算確定待ち)', project: 'P5' }
+  ];
+  var ACT_LABEL = { '10/15': '今日 10/15(木)', '10/14': '昨日 10/14(水)', '10/13': '10/13(火)' };
+
+  var STATUS_GLYPH = {
+    '遅延': '▲', '要注意': '◆', '順調': '●', '保留': 'Ⅱ', '完了': '✓',
+    '未着手': '○', '進行中': '◔', 'レビュー待ち': '◑', 'ブロック': '■'
+  };
+
+  // 初期状態の整理
+  TASKS.forEach(function (t) {
+    t.done = t.status === '完了';
+    t.base = t.done ? '未着手' : t.status;
+  });
+
+  var filter = 'all';
+  var FILTERS = [
+    { key: 'all', label: 'すべて', test: function () { return true; } },
+    { key: 'attn', label: '要対応(遅延・要注意)', test: function (p) { return p.status === '遅延' || p.status === '要注意'; } },
+    { key: 'ok', label: '順調', test: function (p) { return p.status === '順調'; } },
+    { key: 'hold', label: '保留', test: function (p) { return p.status === '保留'; } },
+    { key: 'done', label: '完了', test: function (p) { return p.status === '完了'; } }
+  ];
+
+  /* ---------- helpers ---------- */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function toUTC(iso) {
+    var p = iso.split('-').map(Number);
+    return Date.UTC(p[0], p[1] - 1, p[2]);
+  }
+  function diffDays(iso) { return Math.round((toUTC(iso) - toUTC(TODAY)) / 86400000); }
+  function fmtDate(iso) {
+    var p = iso.split('-').map(Number);
+    return p[1] + '/' + p[2] + '(' + WEEK[new Date(toUTC(iso)).getUTCDay()] + ')';
+  }
+  function projectName(id) {
+    if (!id) return null;
+    for (var i = 0; i < PROJECTS.length; i++) if (PROJECTS[i].id === id) return PROJECTS[i].name;
+    return null;
+  }
+  function taskStatus(t) { return t.done ? '完了' : t.base; }
+  function isToday(t) { return !t.done && (diffDays(t.due) <= 0 || t.base === 'ブロック'); }
+  function isUpcoming(t) { var d = diffDays(t.due); return !t.done && !isToday(t) && d >= 1 && d <= 7; }
+  var PRI_RANK = { '高': 0, '中': 1, '低': 2 };
+
+  function statusBadge(s) {
+    return '<span class="badge st-' + s + '"><span class="g" aria-hidden="true">' + STATUS_GLYPH[s] + '</span>' + esc(s) + '</span>';
+  }
+  function priBadge(p) {
+    return '<span class="pri pri-' + p + '"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>優先度:' + p + '</span>';
+  }
+
+  /* ---------- tasks ---------- */
+  function dueHtml(t) {
+    var d = diffDays(t.due);
+    if (t.done) return '<div class="task-due">' + fmtDate(t.due) + '</div>';
+    if (d < 0) return '<div class="task-due overdue">期限切れ<small>' + fmtDate(t.due) + '(' + (-d) + '日超過)</small></div>';
+    if (d === 0) return '<div class="task-due today">今日が期限<small>' + fmtDate(t.due) + '</small></div>';
+    return '<div class="task-due">' + fmtDate(t.due) + '<small>あと' + d + '日</small></div>';
+  }
+
+  function taskHtml(t, opts) {
+    opts = opts || {};
+    var d = diffDays(t.due);
+    var cls = 'task';
+    if (t.done) cls += ' is-done';
+    if (opts.urgent) {
+      cls += ' urgent';
+      if (d === 0 && t.base !== 'ブロック') cls += ' today';
+      else if (d >= 0 && t.base === 'ブロック') cls += '';
+    }
+    var pn = projectName(t.project);
+    var note = t.done ? (t.doneNote || '') : t.note;
+    var meta = '';
+    meta += '<span>' + (pn ? esc(pn) : 'プロジェクトなし') + '</span>';
+    meta += priBadge(t.priority);
+    meta += statusBadge(taskStatus(t));
+    if (note) meta += '<span class="task-note">' + esc(note) + '</span>';
+    var top = opts.top ? '<span class="badge tag-top" style="margin-right:6px">最優先</span>' : '';
+    return '<li class="' + cls + '" data-id="' + t.id + '">' +
+      '<label class="task-check"><input type="checkbox" data-id="' + t.id + '"' + (t.done ? ' checked' : '') +
+      ' aria-label="' + esc(t.title) + 'を完了にする"></label>' +
+      '<div><div class="task-title">' + top + esc(t.title) + '</div><div class="task-meta">' + meta + '</div></div>' +
+      dueHtml(t) + '</li>';
+  }
+
+  function renderTasks() {
+    var today = TASKS.filter(isToday).sort(function (a, b) {
+      return (toUTC(a.due) - toUTC(b.due)) || (PRI_RANK[a.priority] - PRI_RANK[b.priority]);
+    });
+    var up = TASKS.filter(isUpcoming).sort(function (a, b) {
+      return (toUTC(a.due) - toUTC(b.due)) || (PRI_RANK[a.priority] - PRI_RANK[b.priority]);
+    });
+    var done = TASKS.filter(function (t) { return t.done; });
+    var open = TASKS.length - done.length;
+
+    var tb = $('today-body');
+    if (today.length === 0) {
+      tb.innerHTML = '<div class="empty"><div class="tick" aria-hidden="true">✓</div><div><strong>今日の対応はすべて完了</strong><span>期限切れ・今日期限・ブロック中のタスクはありません。</span></div></div>';
+    } else {
+      tb.innerHTML = '<ul class="task-list">' + today.map(function (t, i) {
+        return taskHtml(t, { urgent: true, top: i === 0 });
+      }).join('') + '</ul>';
+    }
+    $('today-count').textContent = today.length + '件';
+
+    $('up-body').innerHTML = up.length
+      ? '<ul class="task-list">' + up.map(function (t) { return taskHtml(t); }).join('') + '</ul>'
+      : '<p class="none">今後7日以内に期限が来るタスクはありません。</p>';
+    $('up-count').textContent = up.length + '件';
+
+    $('done-body').innerHTML = done.length
+      ? '<ul class="task-list">' + done.map(function (t) { return taskHtml(t); }).join('') + '</ul>'
+      : '<p class="none">完了したタスクはまだありません。</p>';
+    $('done-count').textContent = done.length + '件';
+
+    $('nav-task-count').textContent = open;
+    var attn = PROJECTS.filter(FILTERS[1].test).length;
+    $('summary').innerHTML = '今日対応するタスクは <b>' + today.length + '件</b>、注意が必要なプロジェクトは <b>' + attn + '件</b>です。' +
+      '(自分のタスク 未完了 ' + open + '件 / 完了 ' + done.length + '件)';
+    return today.length;
+  }
+
+  /* ---------- projects ---------- */
+  function dueText(p) {
+    if (!p.due) return '未定';
+    if (p.status === '完了') return fmtDate(p.due) + ' 完了';
+    return fmtDate(p.due);
+  }
+  function projectRow(p) {
+    var pct = Math.round(p.done / p.total * 100);
+    var memo = p.memo ? '<div class="p-memo">' + esc(p.memo) + '</div>' : '';
+    return '<tr>' +
+      '<td class="c-name"><div class="p-name">' + esc(p.name) + '</div>' + memo + '</td>' +
+      '<td data-label="状態">' + statusBadge(p.status) + '</td>' +
+      '<td class="c-prog" data-label="進捗"><div class="progress"><div class="bar s-' + p.status + '" role="img" aria-label="進捗 ' + pct + '%"><span style="width:' + pct + '%"></span></div><span class="pct">' + pct + '%</span></div>' +
+      '<div class="progress-sub">' + p.done + ' / ' + p.total + ' タスク完了</div></td>' +
+      '<td class="nowrap" data-label="期限">' + dueText(p) + '</td>' +
+      '<td class="nowrap" data-label="担当">' + esc(p.owner) + '</td>' +
+      '</tr>';
+  }
+  function renderFilters() {
+    $('filters').innerHTML = FILTERS.map(function (f) {
+      var n = PROJECTS.filter(f.test).length;
+      return '<button type="button" class="filter-btn" data-key="' + f.key + '" aria-pressed="' + (filter === f.key) + '">' +
+        esc(f.label) + '<span class="n">' + n + '</span></button>';
+    }).join('');
+  }
+  function renderProjects() {
+    var f = FILTERS.filter(function (x) { return x.key === filter; })[0];
+    var list = PROJECTS.filter(f.test);
+    $('proj-body').innerHTML = list.map(projectRow).join('');
+    $('proj-shown').textContent = list.length + '件を表示(全' + PROJECTS.length + '件)';
+  }
+  function renderAttention() {
+    var rank = { '遅延': 0, '要注意': 1 };
+    var list = PROJECTS.filter(FILTERS[1].test).sort(function (a, b) { return rank[a.status] - rank[b.status]; });
+    $('attn-count').textContent = list.length + '件';
+    $('attn-list').innerHTML = list.map(function (p) {
+      var pct = Math.round(p.done / p.total * 100);
+      var d = diffDays(p.due);
+      return '<article class="attn st-b-' + p.status + '">' +
+        '<div class="attn-top">' + statusBadge(p.status) + '<h3>' + esc(p.name) + '</h3></div>' +
+        '<p class="attn-memo">' + esc(p.memo) + '</p>' +
+        '<div class="attn-facts"><span>期限 <b>' + fmtDate(p.due) + '</b>(あと' + d + '日)</span><span>進捗 <b>' + pct + '%</b></span><span>担当 <b>' + esc(p.owner) + '</b></span></div>' +
+        '</article>';
+    }).join('');
+  }
+
+  /* ---------- activity ---------- */
+  function renderActivity() {
+    var html = '';
+    var last = null;
+    ACTIVITIES.forEach(function (a) {
+      if (a.date !== last) {
+        if (last !== null) html += '</div>';
+        var n = ACTIVITIES.filter(function (x) { return x.date === a.date; }).length;
+        html += '<div class="act-group"><h3>' + ACT_LABEL[a.date] +
+          (a.date === '10/15' ? '<span class="badge tag-new">新着 ' + n + '件</span>' : '') + '</h3>';
+        last = a.date;
+      }
+      var pn = projectName(a.project);
+      html += '<div class="act-item"><div class="act-meta"><span>' + a.time + '</span><b>' + esc(a.who) + '</b>' +
+        (pn ? '<span>' + esc(pn) + '</span>' : '') + '</div><div class="act-body">' + esc(a.text) + '</div></div>';
+    });
+    html += '</div>';
+    $('act-body').innerHTML = html;
+  }
+
+  /* ---------- events ---------- */
+  function announce(msg) {
+    var el = $('announce');
+    el.textContent = '';
+    setTimeout(function () { el.textContent = msg; }, 30);
+  }
+
+  document.addEventListener('change', function (e) {
+    var cb = e.target;
+    if (!cb.matches || !cb.matches('.task-check input')) return;
+    var id = cb.getAttribute('data-id');
+    var t = TASKS.filter(function (x) { return x.id === id; })[0];
+    t.done = cb.checked;
+    var remain = renderTasks();
+    var again = document.querySelector('.task-check input[data-id="' + id + '"]');
+    if (again) again.focus();
+    announce(t.title + 'を' + (t.done ? '完了にしました' : '未完了に戻しました') + '。今日対応するタスクは' + remain + '件です。');
+  });
+
+  $('filters').addEventListener('click', function (e) {
+    var btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    filter = btn.getAttribute('data-key');
+    renderFilters();
+    renderProjects();
+    var again = document.querySelector('.filter-btn[data-key="' + filter + '"]');
+    if (again) again.focus();
+    announce($('proj-shown').textContent);
+  });
+
+  var sidebar = $('sidebar');
+  var menuBtn = $('menu-btn');
+  function setMenu(open) {
+    sidebar.classList.toggle('open', open);
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuBtn.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
+  }
+  menuBtn.addEventListener('click', function () { setMenu(!sidebar.classList.contains('open')); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) { setMenu(false); menuBtn.focus(); }
+  });
+  sidebar.addEventListener('click', function (e) {
+    if (e.target.closest('a')) setMenu(false);
+  });
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 900) setMenu(false);
+  });
+
+  /* ---------- init ---------- */
+  renderTasks();
+  renderAttention();
+  renderFilters();
+  renderProjects();
+  renderActivity();
+})();
+</script>
+</body>
+</html>
